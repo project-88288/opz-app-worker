@@ -51,16 +51,18 @@ export async function initApp(): Promise<Koa> {
 
 // Stop accepting new connections
 export function stopAcceptingConnections() {
-  if(!isShuttingDown) isShuttingDown = true
-  logger.info('Middleware filter was turn on');
+  if (!isShuttingDown) isShuttingDown = true
+  logger.info('Stop accept new connection');
 }
 
 export function destroyConnections() {
   // Forcefully destroy any remaining active connections after a timeout
-  logger.info(`Connection to destroy total ${connections.length} connection(s)`)
+  logger.info(`Destroy total ${connections.length} connection(s)`)
   setTimeout(() => {
+    let counter = 0
     connections.forEach((res) => {
       res.destroy();
+      logger.log(`Destroy connection count ${counter++}`)
     });
   }, 5000); // Adjust the timeout value as needed
 }

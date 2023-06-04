@@ -19,7 +19,7 @@ export async function initServer(): Promise<http.Server> {
 
   const port = process.env.PORT
   server.listen(port, () => {
-    logger.info(`Listening on port ${port}`)
+    logger.warn(`Listening on port ${port}`)
   })
 
   process.on('SIGTERM', gracefulShutdown);
