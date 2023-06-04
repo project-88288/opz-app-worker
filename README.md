@@ -53,10 +53,10 @@ npm start
     public | tx_history          | table | dev
     (10 rows)
 
-    workermainnet=# select * from pair_info;
-    opz-lab-Testnet=# select * from exchange_rate;
-    opz-lab-Testnet=# select * from pair_day_data;
-    opz-lab-Testnet=#
+    workermainnet=# select * from block;
+    workermainnet=# select * pair_info;
+    workermainnet=# select * from recent_24h;
+    workermainnet=#
     ```
     * Using postgreSQL
     ```
@@ -70,10 +70,10 @@ npm start
     ```
     * connect to database
     ```
-    sudo -u postgres psql opz-lab-phoenix-1;
+    sudo -u postgres psql workermainnet;
     ```
     * create a database
     ```psql
-    postgres => create user alice;
-    postgres => create database opz-lab-phoenix-1 owner alice;
+    postgres => create user dev;
+    postgres => create database workermainnet owner dev;
     ```
