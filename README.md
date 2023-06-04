@@ -58,14 +58,12 @@ npm start
       opz-lab-Testnet=# select * from pair_day_data;
       opz-lab-Testnet=#
       ```
-      * Using postgreSQL
+     * Using postgreSQL
       ```
       sudo -u postgres psql
       psql=#\q
-
-    ```
-     login postgres as root
-
+      ```
+     * login postgres as root
      ```
      sudo su - postgres
      psql
@@ -73,9 +71,7 @@ npm start
      * connect to database
      ```
      sudo -u postgres psql opz-lab-phoenix-1;
-
      ```
-
     * create a database
       ```psql
       postgres => create user alice;
