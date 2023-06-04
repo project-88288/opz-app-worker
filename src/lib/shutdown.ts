@@ -5,6 +5,7 @@ import * as logger from './logger'
 import * as bluebird from 'bluebird'
 import { stopAcceptingConnections,destroyConnections } from '../loader/app';
 import { finalizeCollect } from '../collector/collect';
+import { finalizeORM } from 'orm';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -29,7 +30,7 @@ export async function gracefulShutdown(): Promise<void> {
 
   // Close db connections
   logger.info('Closing db connection')
-  // await finalizeORM()
+   await finalizeORM()
   if(!!process.env.SHUTDOWNTIMEOUT)
   await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 30000)
 

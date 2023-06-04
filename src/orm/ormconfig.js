@@ -3,8 +3,7 @@
 require('dotenv').config();
 const { DefaultNamingStrategy } = require('typeorm')
 const { values, snakeCase } = require('lodash')
-const entities = require('../entities')
-const config = require('../../config')
+const entities = require('orm/entities')
 
 class CamelToSnakeNamingStrategy extends DefaultNamingStrategy {
   tableName(targetName, userSpecifiedName) {
@@ -21,12 +20,14 @@ class CamelToSnakeNamingStrategy extends DefaultNamingStrategy {
   }
 }
 
+const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, SERVER_PORT } = process.env
+
 const connectionOptions = {
   host: 'localhost',
-  port: 5432,
-  username: 'alice',
-  password: 'password',
-  database: config.DB_NAME
+  port: SERVER_PORT,
+  username: POSTGRES_USER,
+  password: POSTGRES_PASSWORD,
+  database: POSTGRES_DB
 }
 
 module.exports = [

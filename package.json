@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx ts-node src/index.ts",
-    "collect": "NODE_ENV=production node --stack_size=4096 --max-old-space-size=4096 -r ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts",
+    "start": "NODE_ENV=production node --stack_size=4096 --max-old-space-size=4096 -r ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,6 +21,8 @@
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.0",
     "koa-router": "^12.0.0",
+    "lodash": "^4.17.21",
+    "pg": "^8.11.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typedi": "^0.10.0",

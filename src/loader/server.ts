@@ -10,14 +10,14 @@ import { initORM } from 'orm/connection';
 let server: http.Server
 
 export async function initServer(): Promise<http.Server> {
+  logger.info('Initialize Db')
+   await initORM()
+
   logger.info('Initialize app')
   const app = await initApp()
 
   logger.info('Initialize GraphQL')
   // await initGraphQL(app)
-
-  logger.info('Initialize Db')
-  //const connections = await initORM()
 
   server = http.createServer(app.callback())
 

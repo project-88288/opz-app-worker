@@ -15,7 +15,7 @@ import { values } from 'lodash'
 import * as logger from 'lib/logger'
 import * as entities from './entities'
 import CamelToSnakeNamingStrategy from 'orm/utils/namingStrategy'
-import config from 'config'
+import config from '../../config'
 
 export const staticOptions = {
   supportBigNumbers: true,
@@ -27,8 +27,7 @@ let connections: Connection[] = []
 function initConnection(options: ConnectionOptions): Promise<Connection> {
   const pgOpts = options as PostgresConnectionOptions
   logger.info(
-    `Connecting to ${pgOpts.username}@${pgOpts.host}:${pgOpts.port || 5432} (${
-      pgOpts.name || 'default'
+    `Connecting to ${pgOpts.username}@${pgOpts.host}:${pgOpts.port || 5432} (${pgOpts.name || 'default'
     })`
   )
 
@@ -42,14 +41,15 @@ function initConnection(options: ConnectionOptions): Promise<Connection> {
 
 export async function initORM(): Promise<Connection[]> {
 
-  process.env.DB_NAME = config.DB_NAME;
-  logger.info(`Initialize ORM, DB_NAME: ${process.env.DB_NAME}`)
+  logger.info(`Initialize ORM, POSTGRES_DB: ${process.env.POSTGRES_DB}`)
+
 
   useContainer(Container)
 
-  const reader = new ConnectionOptionsReader({root:__dirname,configName:"ormconfig.js"})
+  const reader = new ConnectionOptionsReader({ root: __dirname, configName: "ormconfig.js" })
   const options = (await reader.all()).filter((o) => o.name !== 'migration')
 
+  /*
   const { TYPEORM_HOST, TYPEORM_HOST_RO, TYPEORM_USERNAME, TYPEORM_PASSWORD, TYPEORM_DATABASE } =
     process.env
 
@@ -78,8 +78,15 @@ export async function initORM(): Promise<Connection[]> {
 
     connections =  await map(replicaOptions, (opt) => initConnection(opt))
   } else {
-    connections =  await map(options, (opt) => initConnection(opt))
+    */
+  try {
+    connections = await map(options, (opt) => initConnection(opt))
+    logger.info(`DB was successful total ${connections.length}`)
+  } catch (error) {
+    logger.error(`${error}`)
   }
+
+  // }
 
   return connections
 }
@@ -100,5 +107,6 @@ export function getConnections(): Connection[] {
 }
 
 export async function finalizeORM(): Promise<void[]> {
+  logger.info(`Finalize ORM total ${connections.length} connection(s)`)
   return Promise.all(connections.map((c) => c.close()))
 }
