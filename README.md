@@ -64,14 +64,14 @@ npm start
       psql=#\q
       ```
      * login postgres as root
-     ```
-     sudo su - postgres
-     psql
-     ```
+      ```
+      sudo su - postgres
+      psql
+      ```
      * connect to database
-     ```
-     sudo -u postgres psql opz-lab-phoenix-1;
-     ```
+      ```
+      sudo -u postgres psql opz-lab-phoenix-1;
+      ```
     * create a database
       ```psql
       postgres => create user alice;
