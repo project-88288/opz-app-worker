@@ -7,7 +7,6 @@ npm start
 3. Setup the database
   
     * Install postgreSQL
-
       ```
       sudo apt update
       sudo apt install postgresql postgresql-contrib
@@ -17,9 +16,9 @@ npm start
       sudo service postgresql start
       sudo service postgresql status
 
-    ``` 
+      ``` 
     * Seting
-    ```
+      ```
       sudo -u postgres createuser dev
       sudo -u postgres createdb workermainnet
 
@@ -39,20 +38,20 @@ npm start
       workermainnet=# \l
       workermainnet=# \dt
       
-                    List of relations
-        Schema |        Name         | Type  | Owner
-        --------+---------------------+-------+-------
-        public | block               | table | dev
-        public | exchange_rate       | table | dev
-        public | migrations          | table | dev
-        public | pair_day_data       | table | dev
-        public | pair_hour_data      | table | dev
-        public | pair_info           | table | dev
-        public | recent_24h          | table | dev
-        public | terra_swap_day_data | table | dev
-        public | token_info          | table | dev
-        public | tx_history          | table | dev
-        (10 rows)
+                  List of relations
+      Schema |        Name         | Type  | Owner
+      --------+---------------------+-------+-------
+      public | block               | table | dev
+      public | exchange_rate       | table | dev
+      public | migrations          | table | dev
+      public | pair_day_data       | table | dev
+      public | pair_hour_data      | table | dev
+      public | pair_info           | table | dev
+      public | recent_24h          | table | dev
+      public | terra_swap_day_data | table | dev
+      public | token_info          | table | dev
+      public | tx_history          | table | dev
+      (10 rows)
 
       workermainnet=# select * from pair_info;
       opz-lab-Testnet=# select * from exchange_rate;
