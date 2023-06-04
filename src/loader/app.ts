@@ -16,9 +16,9 @@ let connections: http.ServerResponse[] = [];
 export async function initApp(): Promise<Koa> {
   // Create the Koa app
   const app = new Koa();
-  const router = new Router();
+ // const router = new Router();
   // Add middleware
-  app.use(bodyParser());
+ // app.use(bodyParser());
   // Middleware to stop accepting new connections during shutdown
   app.use((ctx, next) => {
     if (isShuttingDown) {
@@ -39,12 +39,12 @@ export async function initApp(): Promise<Koa> {
   });
 
   // Add routes
-  router.get('/users', UserController.getAllUsers);
-  router.post('/users', UserController.createUser);
+ // router.get('/users', UserController.getAllUsers);
+ // router.post('/users', UserController.createUser);
 
   // Register routes with the app
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+ // app.use(router.routes());
+ // app.use(router.allowedMethods());
 
   return app
 }

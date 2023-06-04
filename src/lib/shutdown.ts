@@ -3,7 +3,7 @@
 require('dotenv').config();
 import * as logger from './logger'
 import * as bluebird from 'bluebird'
-import { stopAcceptingConnections,destroyConnections } from '../loders/app';
+import { stopAcceptingConnections,destroyConnections } from '../loader/app';
 import { finalizeCollect } from '../collector/collect';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })

@@ -3,6 +3,7 @@
 require('dotenv').config();
 import * as logger from '../lib/logger'
 import * as bluebird from 'bluebird'
+import { EntityManager} from 'typeorm'
 import { getBlock, getLatestBlock } from '../terra/tendermint';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
@@ -15,17 +16,26 @@ async function loop(
   tokenList: Record<string, boolean>
 ): Promise<void> {
 
-  logger.info(`--collected: ${''} / latest height: ${''}`)
-  const lastHeight = await getBlock(20)
-  console.log(lastHeight)
-   logger.info(`---collected: ${''} / latest height: ${''}`)
+ //const entryManager = new EntityManager('')
+  const block = await getBlock(20)
+  let height = '0'
+  if (block) {
+    console.log(block.block.header.height)
+    height = block.block.header.height
+  }
+
+  logger.info(`---collected: ${''} / latest height: ${''}`)
 
   for (; ;) {
     if (isShuttingDown) { break }
-    const latestBlock =  getLatestBlock()
-    logger.log(`collected: ${''} / latest height: ${''}`)
-   
-   await bluebird.Promise.delay(10000)
+    const latestBlock = await getLatestBlock()
+    if (latestBlock) {
+      console.log(latestBlock.block.header.height)
+      const lastestHeight = latestBlock.block.header.height
+      if (!(Number.parseInt(lastestHeight) % 10))
+        logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
+    }
+    await bluebird.Promise.delay(1000)
   }//
 }
 

@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 
 require('dotenv').config();
-import * as logger from '../lib/logger'
-import * as bluebird from 'bluebird'
 import { LCDClient } from '@terra-money/feather.js';
-
-bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
-global.Promise = bluebird as any // eslint-disable-line
 
 export const terraLCD = new LCDClient({
     'phoenix-1': {
@@ -19,4 +14,8 @@ export const terraLCD = new LCDClient({
       prefix: 'terra',
     }
   });
+
+  export const lcd = terraLCD.config['phoenix-1'].lcd
+  export const chainID = terraLCD.config['phoenix-1'].chainID
+  export const networkName ='mainnet'
 

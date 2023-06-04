@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+require('dotenv').config();
 import { Context } from 'koa';
 
 export class UserController {
@@ -9,8 +12,8 @@ export class UserController {
 
   static createUser(ctx: Context) {
     // Create a new user
-  //  const { name } = ctx.request.body;
+   // const { name } = ctx.request.body;
     // TODO: Add logic to create a user
-    ctx.body = `User ${name} created`;
+    //ctx.body = `User ${name} created`;
   }
 }

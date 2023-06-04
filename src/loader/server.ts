@@ -2,9 +2,10 @@
 
 require('dotenv').config();
 import * as http from 'http'
-import * as logger from '../lib/logger'
+import * as logger from 'lib/logger'
 import { initApp } from './app';
-import { gracefulShutdown } from '../lib/shutdown';
+import { gracefulShutdown } from 'lib/shutdown';
+import { initORM } from 'orm/connection';
 
 let server: http.Server
 
@@ -14,6 +15,9 @@ export async function initServer(): Promise<http.Server> {
 
   logger.info('Initialize GraphQL')
   // await initGraphQL(app)
+
+  logger.info('Initialize Db')
+  //const connections = await initORM()
 
   server = http.createServer(app.callback())
 
