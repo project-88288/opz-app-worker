@@ -3,6 +3,8 @@
 require('dotenv').config();
 import * as fs from 'fs-extra';
 const path = require('path');
+//import * as logger from '../lib/logger'
+//import * as bluebird from 'bluebird'
 
 export const networks = ["mainnet", "testnet", , "classic", "localterra"]
 
@@ -12,44 +14,29 @@ export const objectTemplate: objectList = { "localterra": {}, "mainnet": {}, "te
 export interface arrayList { "localterra": string[], "mainnet": string[], "testnet": string[], "classic": string[] }
 export const arrayTemplate: arrayList = { "localterra": [], "mainnet": [], "testnet": [], "classic": [] }
 
-export function getJsonPath(JsonName: string, configPath: string) {
-    const folder = process.env.TEMP_FOLDER
-    const basePath = `${JsonName}.json`
-    const parentPath = path.dirname(configPath);
-    const jsonPath = path.join(parentPath, folder, basePath)
-    return jsonPath
-}
-
-export function getJPath(JsonName: string, configPath: string) {
-    const folder = process.env.TEMP_FOLDER
-    const basePath = `${JsonName}.js`
-    const parentPath = path.dirname(configPath);
-    const jsonPath = path.join(parentPath, folder, basePath)
-    return jsonPath
-}
-
-export async function loadJson(template: any, JsonPath: string): Promise<any> {
-    if ((await fs.pathExists(JsonPath))) {
-        return await fs.readJSON(JsonPath)
+export async function loadJson(template: any, filename: string): Promise<any> {
+    const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
+    await fs.mkdir(folderPath).then(() => { 
+        //logger.log(`${folderPath} was created`) 
+    }).catch(() => {
+       // logger.log(`${folderPath} is exists`)
+    })
+    const jsonPath = path.join(folderPath, filename)
+    if ((await fs.pathExists(jsonPath))) {
+        return await fs.readJSON(jsonPath)
     }
     else
         return template
 }
 
-export async function storeJson(JsonObject: any, JsonPath: string) {
-    await fs.writeJSON(JsonPath, JsonObject)
+export async function storeJson(JsonObject: any, filename: string) {
+    const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
+    await fs.mkdir(folderPath).then(() => { 
+       // logger.log(`${folderPath} was created`) 
+    }).catch(() => {
+       // logger.log(`${folderPath} is exists`)
+    })
+    const jsonPath = path.join(folderPath, filename)
+    await fs.writeJSON(jsonPath, JsonObject)
 }
 
-
-/*
-const x = createInterfaceObject(JsonObject)
-
-type ObjectType<T> = {
-    [K in keyof T]: T[K];
-};
-
-function createInterfaceObject<T>(obj: T): ObjectType<T> {
-    return obj;
-}
-
-*/

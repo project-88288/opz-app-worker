@@ -11,12 +11,12 @@ if(process.env.DATABASE_URL) {
 }
 
 if (require.main === module) {
- //  initServer()
-  //  collect()
+  initServer()
+  collect()
 }
 
 
 //caches_pull('names')
 //cachses_push('test')
-block_push('test',['block.json'])
-block_pull('test',['block.json'])
+//block_push('test',['block.json'])
+//block_pull('test',['block.json'])

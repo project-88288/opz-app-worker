@@ -7,6 +7,8 @@ import { EntityManager, getManager } from 'typeorm'
 import { getBlock, getLatestBlock } from '../terra/tendermint';
 import { getConnections, BlockEntity } from 'orm';
 import { getCollectedBlock, updateBlock } from './block';
+import { block_pull, block_push } from './caches';
+import { loadJson, storeJson, arrayTemplate, objectTemplate } from '../lib/jsonFiles'
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -18,8 +20,9 @@ async function loop(
   tokenList: Record<string, boolean>
 ): Promise<void> {
 
-  let failcounter =0
-  for (;;) {
+  let blockJson = await loadJson(objectTemplate, 'block.json')
+  let failcounter = 0
+  for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
@@ -40,22 +43,25 @@ async function loop(
       const collectedBlock = await getCollectedBlock()
       const lastHeight = collectedBlock.height
       const height = lastHeight + 1
-    
+      blockJson['mainnet']['height'] = height
+
       const latestBlock = await getLatestBlock()
       if (latestBlock) {
         const lastestHeight = latestBlock.block.header.height
         await getManager().transaction(async (manager: EntityManager) => {
-         // await updateBlock(collectedBlock, 0, manager.getRepository(BlockEntity))
+          // await updateBlock(collectedBlock, 0, manager.getRepository(BlockEntity))
           const block = await getBlock(height)
           if (block) {
-           await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
-           // if (!(height % 10)) 
-            logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
+            await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+            await storeJson(blockJson, 'block.json')
+            await block_push('test', ['block.json'])
+            if (!(height % 10))
+              logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
           }
         })
       }
 
-     } catch (error) {
+    } catch (error) {
       logger.error(`Collector error: ${error}`)
     }
 
@@ -65,7 +71,24 @@ async function loop(
 
 export async function collect(): Promise<void> {
 
-  logger.info(`Initialize collector, start_block_height: ${process.env.START_BLOCK_HEIGHT}`)
+
+  await block_pull('test',['block.json'])
+  
+  let blockJson = await loadJson(objectTemplate, 'block.json')
+  const height = blockJson['mainnet']['height']
+  logger.info(`Initialize collector, start_block_height: ${height}`)
+  
+  const collectedBlock = await getCollectedBlock()
+  await getManager().transaction(async (manager: EntityManager) => {
+      await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+  })
+
+  // console.log(block['mainnet'])
+  //block['mainnet']['height']=0
+  //await storeJson(block,'block.json')
+  //await block_push('test',['block.json'])
+
+
   //logger.info(`Initialize collector, NETWORK_NAME: ${config.NETWORK_NAME}`)
 
   // initErrorHandler({ sentryDsn: process.env.SENTRY })
