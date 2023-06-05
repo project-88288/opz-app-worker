@@ -4,7 +4,6 @@ require('dotenv').config();
 const { BlobServiceClient } = require("@azure/storage-blob");
 import * as fs from 'fs-extra';
 const path = require('path');
-import { createContainer } from 'lib/azure_blobService';
 import * as logger from '../lib/logger'
 import * as bluebird from 'bluebird'
 
