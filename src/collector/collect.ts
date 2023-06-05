@@ -18,7 +18,8 @@ async function loop(
   tokenList: Record<string, boolean>
 ): Promise<void> {
 
-  for (let index = 1; index < 10; index++) {
+  let failcounter =0
+  for (;;) {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
@@ -26,7 +27,7 @@ async function loop(
       })
       break
     } else {
-      logger.error(`Wait db connection count ${index}`)
+      logger.error(`Fail db connect count ${failcounter}`)
       await bluebird.Promise.delay(10000)
     }
   }

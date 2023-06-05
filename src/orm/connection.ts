@@ -32,9 +32,9 @@ function initConnection(options: ConnectionOptions): Promise<Connection> {
   const { DATABASE_URL } = process.env
 
   if (DATABASE_URL) {
-    logger.info( `Connecting to ${pgOpts.url} (${pgOpts.name || 'default'})`)
+    logger.info(`Connecting to ${pgOpts.url} (${pgOpts.name || 'default'})`)
   } else {
-    logger.info( `Connecting to ${pgOpts.username}@${pgOpts.host}:${pgOpts.port || 5432} (${pgOpts.name || 'default'  })` )
+    logger.info(`Connecting to ${pgOpts.username}@${pgOpts.host}:${pgOpts.port || 5432} (${pgOpts.name || 'default'})`)
   }
 
   return createConnection({
@@ -56,16 +56,18 @@ export async function initORM(): Promise<Connection[]> {
 
   const { DATABASE_URL } = process.env
   if (DATABASE_URL) {
-
-    try {
-      connections = await map(options, (opt) => initConnection(opt))
-      connections.forEach(element => {
-        logger.warn(`DB connection was successful as ${element.name}`)
-      })
-    } catch (error) {
-      logger.error(`DB connection error: ${error}`)
+    for (; ;) {
+      try {
+        connections = await map(options, (opt) => initConnection(opt))
+        connections.forEach(element => {
+          logger.warn(`DB connection was successful as ${element.name}`)
+        })
+        break
+      } catch (error) {
+        logger.error(`DB connection error: ${error}`)
+      }
+      await bluebird.Promise.delay(10000)
     }
-
   }
   else {
 
@@ -93,14 +95,18 @@ export async function initORM(): Promise<Connection[]> {
         },
       }))
 
-      try {
-        connections = await map(replicaOptions, (opt) => initConnection(opt))
-      } catch (error) {
-        logger.error(`${error}`)
+      for (; ;) {
+
+        try {
+          connections = await map(replicaOptions, (opt) => initConnection(opt))
+        } catch (error) {
+          logger.error(`${error}`)
+        }
+        await bluebird.Promise.delay(10000)
       }
 
     } else {
-      for (let index = 0; index < 10; index++) {
+      for (; ;) {
         try {
           connections = await map(options, (opt) => initConnection(opt))
           connections.forEach(element => {
@@ -110,6 +116,7 @@ export async function initORM(): Promise<Connection[]> {
         } catch (error) {
           logger.error(`DB connection error: ${error}`)
         }
+        await bluebird.Promise.delay(10000)
       }
     }
   }
