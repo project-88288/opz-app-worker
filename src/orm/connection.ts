@@ -29,10 +29,13 @@ let connections: Connection[] = []
 
 function initConnection(options: ConnectionOptions): Promise<Connection> {
   const pgOpts = options as PostgresConnectionOptions
-  logger.info(
-    `Connecting to ${pgOpts.username}@${pgOpts.host}:${pgOpts.port || 5432} (${pgOpts.name || 'default'
-    })`
-  )
+  const { DATABASE_URL } = process.env
+
+  if (DATABASE_URL) {
+    logger.info( `Connecting to ${pgOpts.url} (${pgOpts.name || 'default'})`)
+  } else {
+    logger.info( `Connecting to ${pgOpts.username}@${pgOpts.host}:${pgOpts.port || 5432} (${pgOpts.name || 'default'  })` )
+  }
 
   return createConnection({
     ...options,
@@ -52,7 +55,6 @@ export async function initORM(): Promise<Connection[]> {
   const options = (await reader.all()).filter((o) => o.name == 'default')
 
   const { DATABASE_URL } = process.env
-
   if (DATABASE_URL) {
 
     try {

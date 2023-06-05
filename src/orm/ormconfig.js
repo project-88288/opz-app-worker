@@ -37,7 +37,7 @@ const connectionOntion2 ={
 
 module.exports = [
   {
-    name: 'default2',
+    name: (!DATABASE_URL)? 'default':'default2',
     type: 'postgres',
     synchronize: false,
     migrationsRun: true,
@@ -47,7 +47,7 @@ module.exports = [
     ...connectionOptions,
   },
   {
-    name: 'default',
+    name: (!DATABASE_URL)? 'default2':'default',
     type: 'postgres',
     synchronize: false,
     migrationsRun: true,
