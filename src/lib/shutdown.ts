@@ -15,7 +15,7 @@ export async function gracefulShutdown(): Promise<void> {
   console.log('')
   // Docker will stop to direct traffic 10 seconds after stop signal
   logger.warn('Shutdown procedure started')
-  // Middleware to stop accepting new connections during shutdown
+  
   stopAcceptingConnections()
   destroyConnections()
   finalizeCollect()

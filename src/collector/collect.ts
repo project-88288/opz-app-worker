@@ -27,7 +27,7 @@ async function loop(
       })
       break
     } else {
-      logger.error(`Fail db connect count ${failcounter}`)
+      logger.error(`Db connection empty count ${failcounter++}`)
       await bluebird.Promise.delay(10000)
     }
   }
