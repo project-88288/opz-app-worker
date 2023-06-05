@@ -20,7 +20,8 @@ class CamelToSnakeNamingStrategy extends DefaultNamingStrategy {
   }
 }
 
-const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, SERVER_PORT } = process.env
+const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, SERVER_PORT, SERVER_HOST } = process.env
+const { DATABASE_URL } = process.env
 
 const connectionOptions = {
   host: 'localhost',
@@ -30,7 +31,21 @@ const connectionOptions = {
   database: POSTGRES_DB
 }
 
+const connectionOntion2 ={
+  url: DATABASE_URL,
+}
+
 module.exports = [
+  {
+    name: 'default2',
+    type: 'postgres',
+    synchronize: false,
+    migrationsRun: true,
+    logging: false,
+    logger: 'file',
+    migrations: ['src/orm/migrations/*.ts'],
+    ...connectionOptions,
+  },
   {
     name: 'default',
     type: 'postgres',
@@ -39,7 +54,7 @@ module.exports = [
     logging: false,
     logger: 'file',
     migrations: ['src/orm/migrations/*.ts'],
-    ...connectionOptions,
+    ...connectionOntion2,
   },
   {
     name: 'migration',
@@ -55,4 +70,5 @@ module.exports = [
     namingStrategy: new CamelToSnakeNamingStrategy(),
     ...connectionOptions,
   },
+
 ]

@@ -3,8 +3,10 @@
 require('dotenv').config();
 import * as logger from '../lib/logger'
 import * as bluebird from 'bluebird'
-import { EntityManager} from 'typeorm'
+import { EntityManager, getManager } from 'typeorm'
 import { getBlock, getLatestBlock } from '../terra/tendermint';
+import { getConnections, BlockEntity } from 'orm';
+import { getCollectedBlock, updateBlock } from './block';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -16,25 +18,46 @@ async function loop(
   tokenList: Record<string, boolean>
 ): Promise<void> {
 
- //const entryManager = new EntityManager('')
-  const block = await getBlock(20)
-  let height = '0'
-  if (block) {
-    console.log(block.block.header.height)
-    height = block.block.header.height
+  for (let index = 1; index < 10; index++) {
+    let connections = getConnections();
+    if (connections.length > 0) {
+      connections.forEach(element => {
+        logger.warn(`Db connection ${element.name} is ready`)
+      })
+      break
+    } else {
+      logger.error(`Wait db connection count ${index}`)
+      await bluebird.Promise.delay(10000)
+    }
   }
-
-  logger.info(`---collected: ${''} / latest height: ${''}`)
 
   for (; ;) {
     if (isShuttingDown) { break }
-    const latestBlock = await getLatestBlock()
-    if (latestBlock) {
-      console.log(latestBlock.block.header.height)
-      const lastestHeight = latestBlock.block.header.height
-      if (!(Number.parseInt(lastestHeight) % 10))
-        logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
+
+    try {
+
+      const collectedBlock = await getCollectedBlock()
+      const lastHeight = collectedBlock.height
+      const height = lastHeight + 1
+    
+      const latestBlock = await getLatestBlock()
+      if (latestBlock) {
+        const lastestHeight = latestBlock.block.header.height
+        await getManager().transaction(async (manager: EntityManager) => {
+         // await updateBlock(collectedBlock, 0, manager.getRepository(BlockEntity))
+          const block = await getBlock(height)
+          if (block) {
+           await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+           // if (!(height % 10)) 
+            logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
+          }
+        })
+      }
+
+     } catch (error) {
+      logger.error(`Collector error: ${error}`)
     }
+
     await bluebird.Promise.delay(1000)
   }//
 }

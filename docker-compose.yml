@@ -1,5 +1,13 @@
 version: '3'
 services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://dev:dev@db:5432/workermainnet
   db:
     image: postgres
     restart: always
@@ -7,16 +15,3 @@ services:
       POSTGRES_USER: dev
       POSTGRES_PASSWORD: dev
       POSTGRES_DB: workermainnet
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./data:/var/lib/postgresql/data
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    ports:
-      - '3000:3000'

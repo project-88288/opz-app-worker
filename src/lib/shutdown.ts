@@ -6,6 +6,7 @@ import * as bluebird from 'bluebird'
 import { stopAcceptingConnections,destroyConnections } from '../loader/app';
 import { finalizeCollect } from '../collector/collect';
 import { finalizeORM } from 'orm';
+import { finalizeServer } from 'loader/server';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -21,18 +22,11 @@ export async function gracefulShutdown(): Promise<void> {
   if(!!process.env.SHUTDOWNTIMEOUT)
   await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 10000)
  
-
   // Stop accepting new connection
   logger.info('Closing listening port')
-  // await finalizeServer()
+   await finalizeServer()
   if(!!process.env.SHUTDOWNTIMEOUT)
    await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 30000)
-
-  // Close db connections
-  logger.info('Closing db connection')
-   await finalizeORM()
-  if(!!process.env.SHUTDOWNTIMEOUT)
-  await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 30000)
 
   logger.warn('Finished')
   process.exit(0)

@@ -2,6 +2,7 @@
 
 require('dotenv').config();
 import { map } from 'bluebird'
+import * as bluebird from 'bluebird'
 import {
   Connection,
   createConnection,
@@ -15,7 +16,9 @@ import { values } from 'lodash'
 import * as logger from 'lib/logger'
 import * as entities from './entities'
 import CamelToSnakeNamingStrategy from 'orm/utils/namingStrategy'
-import config from '../../config'
+
+bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
+global.Promise = bluebird as any // eslint-disable-line
 
 export const staticOptions = {
   supportBigNumbers: true,
@@ -43,50 +46,71 @@ export async function initORM(): Promise<Connection[]> {
 
   logger.info(`Initialize ORM, POSTGRES_DB: ${process.env.POSTGRES_DB}`)
 
-
   useContainer(Container)
 
   const reader = new ConnectionOptionsReader({ root: __dirname, configName: "ormconfig.js" })
-  const options = (await reader.all()).filter((o) => o.name !== 'migration')
+  const options = (await reader.all()).filter((o) => o.name == 'default')
 
-  /*
-  const { TYPEORM_HOST, TYPEORM_HOST_RO, TYPEORM_USERNAME, TYPEORM_PASSWORD, TYPEORM_DATABASE } =
-    process.env
+  const { DATABASE_URL } = process.env
 
-  if (TYPEORM_HOST_RO) {
-    const replicaOptions = options.map((option) => ({
-      ...option,
-      replication: {
-        master: {
-          host: TYPEORM_HOST,
-          username: TYPEORM_USERNAME,
-          password: TYPEORM_PASSWORD,
-          database: TYPEORM_DATABASE,
-        },
-        slaves: [
-          {
-            host: TYPEORM_HOST_RO,
+  if (DATABASE_URL) {
+
+    try {
+      connections = await map(options, (opt) => initConnection(opt))
+      connections.forEach(element => {
+        logger.warn(`DB connection was successful as ${element.name}`)
+      })
+    } catch (error) {
+      logger.error(`DB connection error: ${error}`)
+    }
+
+  }
+  else {
+
+    const { TYPEORM_HOST, TYPEORM_HOST_RO, TYPEORM_USERNAME, TYPEORM_PASSWORD, TYPEORM_DATABASE } =
+      process.env
+
+    if (TYPEORM_HOST_RO) {
+      const replicaOptions = options.map((option) => ({
+        ...option,
+        replication: {
+          master: {
+            host: TYPEORM_HOST,
             username: TYPEORM_USERNAME,
             password: TYPEORM_PASSWORD,
             database: TYPEORM_DATABASE,
           },
-        ],
-      },
-    }))
+          slaves: [
+            {
+              host: TYPEORM_HOST_RO,
+              username: TYPEORM_USERNAME,
+              password: TYPEORM_PASSWORD,
+              database: TYPEORM_DATABASE,
+            },
+          ],
+        },
+      }))
 
-    console.log(replicaOptions)
+      try {
+        connections = await map(replicaOptions, (opt) => initConnection(opt))
+      } catch (error) {
+        logger.error(`${error}`)
+      }
 
-    connections =  await map(replicaOptions, (opt) => initConnection(opt))
-  } else {
-    */
-  try {
-    connections = await map(options, (opt) => initConnection(opt))
-    logger.info(`DB was successful total ${connections.length}`)
-  } catch (error) {
-    logger.error(`${error}`)
+    } else {
+      for (let index = 0; index < 10; index++) {
+        try {
+          connections = await map(options, (opt) => initConnection(opt))
+          connections.forEach(element => {
+            logger.warn(`DB connection was successful as ${element.name}`)
+          })
+          break
+        } catch (error) {
+          logger.error(`DB connection error: ${error}`)
+        }
+      }
+    }
   }
-
-  // }
 
   return connections
 }
