@@ -6,22 +6,6 @@ const path = require('path');
 
 export const networks = ["mainnet", "testnet", , "classic", "localterra"]
 
-export const JsonArray = () => {
-    let obj = {}
-    networks.forEach(element => {
-        if (!!element) obj[element] = []
-    })
-    return obj
-}
-
-export const JsonObject = () => {
-    let obj = {}
-    networks.forEach(element => {
-        if (!!element) obj[element] = {}
-    })
-    return obj
-}
-
 export interface objectList { "localterra": {}, "mainnet": {}, "testnet": {}, "classic": {} }
 export const objectTemplate: objectList = { "localterra": {}, "mainnet": {}, "testnet": {}, "classic": {} }
 
