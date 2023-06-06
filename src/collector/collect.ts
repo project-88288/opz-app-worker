@@ -23,13 +23,6 @@ async function loop(
   tokenList: Record<string, boolean>
 ): Promise<void> {
 
-  /*
-  await getManager().transaction(async (manager: EntityManager) => {
-    const collectedBlock = await getCollectedBlock()
-    await updateBlock(collectedBlock, 0, manager.getRepository(BlockEntity))
-  }
-  */
-
   let blockJson = await loadJson(objectTemplate, 'block.json')
   let failcounter = 0
   for (; ;) {
@@ -54,11 +47,10 @@ async function loop(
       const lastHeight = collectedBlock.height
       const height = lastHeight + 1
 
-      if (!(height % 5)) {
+      if (!(height % 100)) {
         const latestBlock = await getLatestBlock()
         if (latestBlock) {
-          const lastestHeight = latestBlock.block.header.height
-          blockJson['mainnet']['latestHeight'] = lastestHeight
+          blockJson['mainnet']['latestHeight'] = latestBlock.block.header.height
           await storeJson(blockJson, 'block.json')
           await block_push('worker', ['block.json'])
         }
@@ -81,7 +73,6 @@ async function loop(
         }
       })
 
-
     } catch (error) {
       logger.error(`Collector error: ${error}`)
     }
@@ -93,7 +84,7 @@ async function loop(
 export async function collect(): Promise<void> {
 
 
-  await block_pull('worker', ['block.json'])
+  await block_pull('worker', ['block.json','tsxtype.json','tsxtypeHeight.json'])
 
   let blockJson = await loadJson(objectTemplate, 'block.json')
   const height = blockJson['mainnet']['height']
