@@ -20,7 +20,7 @@ class CamelToSnakeNamingStrategy extends DefaultNamingStrategy {
   }
 }
 
-const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, SERVER_PORT, SERVER_HOST } = process.env
+const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, SERVER_PORT } = process.env
 const { DATABASE_URL } = process.env
 
 const connectionOptions = {

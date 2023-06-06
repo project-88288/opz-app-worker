@@ -26,8 +26,8 @@ export async function initServer(): Promise<http.Server> {
   // await initGraphQL(app)
 
   server = http.createServer(app.callback())
-
-  const port = process.env.PORT
+   const {DATABASE_URL} = process.env
+  const port = DATABASE_URL? 3101:3100
   server.listen(port, () => {
     logger.warn(`Listening on port ${port}`)
   })
