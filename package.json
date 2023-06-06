@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=production node --stack_size=4096 --max-old-space-size=4096 --trace-warnings -r  ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts",
+    "start": "NODE_ENV=production node --stack_size=4096 --max-old-space-size=4096 -r  ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

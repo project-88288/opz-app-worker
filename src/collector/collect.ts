@@ -64,7 +64,7 @@ async function loop(
         if (block) {
           findPair(block)
           findToken(block)
-          findType(block)
+        //  findType(block)
           blockJson['mainnet']['height'] = block.block.header.height
           await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
           await storeJson(blockJson, 'block.json')
@@ -87,7 +87,7 @@ async function loop(
 export async function collect(): Promise<void> {
 
 
-  await block_pull('worker', ['block.json','tsxtype.json','tsxtypeHeight.json'])
+  await block_pull('worker', ['block.json','tsxtype.json','tsxtypeHeight.json','peerIpv6.json'])
 
   let blockJson = await loadJson(objectTemplate, 'block.json')
   const height = blockJson['mainnet']['height']
