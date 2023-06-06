@@ -48,16 +48,14 @@ async function loop(
       const height = lastHeight + 1
 
       if(height>= blockJson['mainnet']['latestHeight']) {
-        continue
-      }
-
-      if (!(height % 100)) {
+        await bluebird.Promise.delay(120000)
         const latestBlock = await getLatestBlock()
         if (latestBlock) {
           blockJson['mainnet']['latestHeight'] = latestBlock.block.header.height
           await storeJson(blockJson, 'block.json')
           await block_push('worker', ['block.json'])
         }
+        continue
       }
 
       await getManager().transaction(async (manager: EntityManager) => {
@@ -71,7 +69,7 @@ async function loop(
           await storeJson(blockJson, 'block.json')
           await block_push('worker', ['block.json'])
           const lastestHeight = blockJson['mainnet']['latestHeight']
-          if (!(height % 10)) {
+          if (!(height % 100)) {
             logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
           }
         }
