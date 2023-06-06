@@ -94,7 +94,7 @@ export async function block_push(containerName: string, files: string[]) {
                 const data = await fs.readFile(filePath);
                 const blockBlobClient = containerClient.getBlockBlobClient(bolb);
                 await blockBlobClient.upload(data, data.length).then(() => {
-                   // logger.log(`Uploaded "${bolb}" to Azure Storage (${containerName})`);
+                    logger.log(`Uploaded "${bolb}" to Azure Storage (${containerName})`);
                 })
             }
         }
@@ -122,7 +122,7 @@ export async function block_pull(containerName: string, files: string[]) {
             const filePath = path.join(folderPath, bolb)
             const blockBlobClient = containerClient.getBlockBlobClient(bolb);
             await blockBlobClient.downloadToFile(filePath).then(() => {
-                //logger.log(`Download "${bolb}" from Azue Storage (${containerName})`);
+                logger.log(`Download "${bolb}" from Azue Storage (${containerName})`);
             })
         }
     }
