@@ -7,7 +7,7 @@ import * as logger from 'lib/logger'
 import { initApp } from './app';
 import { gracefulShutdown } from 'lib/shutdown';
 import { finalizeORM, initORM } from 'orm/connection';
-import { cronJobStart, dailyroutine } from 'lib/cronjob';
+import { cronJobStart } from 'lib/cronjob';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -27,7 +27,7 @@ export async function initServer(): Promise<http.Server> {
 
   server = http.createServer(app.callback())
    const {DATABASE_URL} = process.env
-  const port = DATABASE_URL? 3101:3100
+  const port = DATABASE_URL? 3100:3101
   server.listen(port, () => {
     logger.warn(`Listening on port ${port}`)
   })
