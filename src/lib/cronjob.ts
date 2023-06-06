@@ -64,7 +64,6 @@ export const updateLatestHeight = async () => {
 const files: string[] = [
   'allpaircontract.json',
   'alltokencontract.json',
-  'block.json',
   'peerIpv6.json',
   'tsxtype.json',
   'tsxtypeHeight.json',
