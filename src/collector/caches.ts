@@ -17,7 +17,7 @@ const blobServiceClient = BlobServiceClient.fromConnectionString(storageAccountC
 export async function caches_pull(containerName: string) {
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath)
+    await fs.mkdir(folderPath).catch(()=>{})
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -41,7 +41,7 @@ export async function caches_pull(containerName: string) {
 export async function cachses_push(containerName: string) {
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath)
+    await fs.mkdir(folderPath).catch(()=>{})
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -76,7 +76,7 @@ export async function deleteBolbContainer(containerName: string) {
 export async function block_push(containerName: string, files: string[]) {
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath)
+    await fs.mkdir(folderPath).catch(()=>{})
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -93,8 +93,8 @@ export async function block_push(containerName: string, files: string[]) {
             if (await fs.pathExists(filePath)) {
                 const data = await fs.readFile(filePath);
                 const blockBlobClient = containerClient.getBlockBlobClient(bolb);
-                await blockBlobClient.upload(data, data.length).tnen(() => {
-                    logger.log(`Uploaded "${bolb}" to Azure Storage (${containerName})`);
+                await blockBlobClient.upload(data, data.length).then(() => {
+                   // logger.log(`Uploaded "${bolb}" to Azure Storage (${containerName})`);
                 })
             }
         }
@@ -104,7 +104,7 @@ export async function block_push(containerName: string, files: string[]) {
 export async function block_pull(containerName: string, files: string[]) {
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath)
+    await fs.mkdir(folderPath).catch(()=>{})
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -122,32 +122,7 @@ export async function block_pull(containerName: string, files: string[]) {
             const filePath = path.join(folderPath, bolb)
             const blockBlobClient = containerClient.getBlockBlobClient(bolb);
             await blockBlobClient.downloadToFile(filePath).then(() => {
-                logger.log(`Download "${bolb}" from Azue Storage (${containerName})`);
-            })
-        }
-    }
-}
-
-export async function block_delete(containerName: string, files: string[]) {
-    let containers = []
-    const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath)
-    for await (const container of blobServiceClient.listContainers()) {
-        containers.push(container.name)
-    }
-    if (containers.includes(containerName)) {
-        const containerClient = blobServiceClient.getContainerClient(containerName);
-        let bolbs = []
-        for await (const blob of containerClient.listBlobsFlat()) {
-            if (files.includes(blob.name)) {
-                bolbs.push(blob.name)
-            }
-        }
-        for (let index = 0; index < bolbs.length; index++) {
-            const bolb = bolbs[index];
-            const blockBlobClient = containerClient.getBlockBlobClient(bolb);
-            await blockBlobClient.delete().then(() => {
-                logger.log(`Delete "${bolb}" in Azue Storage (${containerName})`);
+                //logger.log(`Download "${bolb}" from Azue Storage (${containerName})`);
             })
         }
     }

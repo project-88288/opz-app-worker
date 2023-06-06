@@ -12,6 +12,7 @@ import { loadJson, storeJson, arrayTemplate, objectTemplate } from '../lib/jsonF
 import { findPair } from 'indexers/findPair';
 import { findToken } from 'indexers/findToken';
 import { findType } from 'indexers/findType';
+import { has } from 'lodash';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -21,34 +22,44 @@ async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
-  let blockJson = await loadJson(objectTemplate, 'block.json')
+
   for (; ;) {
     if (isShuttingDown) { break }
     try {
       const collectedBlock = await getCollectedBlock()
       const lastHeight = collectedBlock.height
+      //let lastHeight = 0
+      const blockJson = await loadJson(objectTemplate, 'block.json')
+      //  if (blockJson['mainnet']['height']) {
+      //lastHeight = Number.parseInt(blockJson['mainnet']['height'])
+      //  }
       const height = lastHeight + 1
       if (height >= Number.parseInt(blockJson['mainnet']['latestHeight'])) {
         logger.warn(`No more block to get!`)
         await bluebird.Promise.delay(120000)
         const latestBlock = await getLatestBlock()
+
         if (latestBlock) {
           blockJson['mainnet']['latestHeight'] = latestBlock.block.header.height
           await storeJson(blockJson, 'block.json')
-          await block_push('worker', ['block.json'])
+          //  await block_push('worker', ['block.json'])
         }
         continue
       }
+
       await getManager().transaction(async (manager: EntityManager) => {
         const block = await getBlock(height)
+        await bluebird.Promise.delay(1000)
         if (block) {
           findPair(block)
           findToken(block)
           findType(block)
           blockJson['mainnet']['height'] = block.block.header.height
+          // const  height2 = 0
+          console.log(height)
           await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
           await storeJson(blockJson, 'block.json')
-          await block_push('worker', ['block.json'])
+        //  await block_push('worker', ['block.json'])
           const lastestHeight = blockJson['mainnet']['latestHeight']
           if (!(height % 10)) {
             logger.log(`collected: ${height} / latest height: ${lastestHeight}`)

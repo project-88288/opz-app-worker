@@ -14,4 +14,7 @@ export class BlockEntity {
 
   @Column()
   height: number
+
+  @Column()
+  latestheight: number
 }
