@@ -40,3 +40,10 @@ export async function renameJson(srcfile: string, dscfile: string) {
     const dscPath = path.join(folderPath, dscfile)
     await fs.renameSync(srcPath, dscPath)
 }
+
+export async function removeJson(filename: string) {
+    const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
+    const filePath = path.join(folderPath, filename)
+    await fs.removeSync(filePath)
+}
+

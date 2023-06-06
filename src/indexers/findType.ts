@@ -1,6 +1,6 @@
 import { BlockInfo, Tx } from "@terra-money/feather.js";
 import { block_push } from "collector/caches";
-import { arrayTemplate, loadJson, objectTemplate, renameJson, storeJson } from "lib/jsonFiles";
+import { arrayTemplate, loadJson, objectTemplate, removeJson, renameJson, storeJson } from "lib/jsonFiles";
 
 
 export async function findType(block: BlockInfo) {
@@ -32,11 +32,10 @@ export async function findType(block: BlockInfo) {
     if (!(Number.parseInt(height) % 500)) {
       try {
       await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_${height}.json`).catch(() => { })
+      await block_push('worker', [`tsxtypeHeight_${height}.json`])
+      await removeJson(`tsxtypeHeight_${height}.json`)
       loadJson(objectTemplate, 'tsxtypeHeight.json')
       } catch (error) { }
-      //await block_push('worker', [`tsxtypeHeight_${height}.json`])
     }
-    //
-    //await block_push('worker', ['tsxtype.json',`tsxtypeHeight.json`])
   }
 }
