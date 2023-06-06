@@ -121,6 +121,12 @@ export async function initORM(): Promise<Connection[]> {
     }
   }
 
+  for(;;){
+    if(connections.length>0) {
+      break
+    }
+  }
+  
   return connections
 }
 

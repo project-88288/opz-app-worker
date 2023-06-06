@@ -80,15 +80,16 @@ export async function collect(): Promise<void> {
       await bluebird.Promise.delay(10000)
     }
   }
+
   const collectedBlock = await getCollectedBlock()
   const height = collectedBlock.height
   await getManager().transaction(async (manager: EntityManager) => {
     await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
   })
   const pairList = await loadJson(objectTemplate, 'allpaircontract.json')
-  logger.log('pairs: ', pairList)
+ // logger.log('pairs: ', pairList)
   const tokenList = await loadJson(objectTemplate, 'alltokencontract.json')
-  logger.log('tokens: ', tokenList)
+ // logger.log('tokens: ', tokenList)
   logger.warn('Start collecting')
   await loop(pairList, tokenList)
 }

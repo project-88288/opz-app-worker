@@ -3,14 +3,14 @@
 require('dotenv').config();
 import { CronJob } from 'cron';
 import * as logger from '../lib/logger'
+import * as bluebird from 'bluebird'
 import { getIPv6Address, getServerPort } from './ipv6';
 import { arrayTemplate, loadJson, removeJson, storeJson } from './jsonFiles';
-import { objectTemplate } from './jsonFiles';
 import { block_pull, block_push } from 'collector/caches';
 import { getLatestBlock } from 'terra/tendermint';
-import { getCollectedBlock, updateBlock } from 'collector/block';
+import { getCollectedBlock, updateBlock, updateLatestBlock } from 'collector/block';
 import { EntityManager, getManager } from 'typeorm';
-import { BlockEntity } from 'orm';
+import { BlockEntity, getConnections } from 'orm';
 
 export const updateipv6 = async () => {
   try {
@@ -32,14 +32,27 @@ export const updateipv6 = async () => {
 };
 
 export const updateLatestHeight = async () => {
+  let failcounter = 0
+  for (; ;) {
+    let connections = getConnections();
+    if (connections.length > 0) {
+      connections.forEach(element => {
+        logger.warn(`Db connection ${element.name} is ready`)
+      })
+      break
+    } else {
+      logger.error(`Db connection empty count ${failcounter++}`)
+      await bluebird.Promise.delay(10000)
+    }
+  }
   try {
     const latestBlock = await getLatestBlock()
     if (latestBlock) {
       const collectedBlock = await getCollectedBlock()
-      const height = Number.parseInt(latestBlock.block.header.height)
-      logger.warn(`New latest height: ${height}`)
+      const latestheight = Number.parseInt(latestBlock.block.header.height)
+      logger.warn(`New latest height: ${latestheight}`)
       await getManager().transaction(async (manager: EntityManager) => {
-        await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+       await  updateLatestBlock(collectedBlock,latestheight, manager.getRepository(BlockEntity))
       })
     }
   } catch (error) {
