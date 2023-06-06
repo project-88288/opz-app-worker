@@ -3,7 +3,6 @@
 require('dotenv').config();
 import { CronJob } from 'cron';
 import * as logger from '../lib/logger'
-import * as bluebird from 'bluebird'
 import { getIPv6Address, getServerPort } from './ipv6';
 import { loadJson, storeJson } from './jsonFiles';
 import { objectTemplate } from './jsonFiles';
@@ -20,6 +19,7 @@ export const dailyroutine1 = async () => {
       data['mainnet'][ipv6] = port
       storeJson(data, 'peerIpv6.json')
       block_push('worker', ['peerIpv6.json'])
+      logger.warn(`https://${ipv6}}:${port}`)
     }
   } catch (error) {
     // logger.error(`Dailyroutine error: ${error}`)
