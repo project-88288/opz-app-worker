@@ -16,33 +16,27 @@ export const arrayTemplate: arrayList = { "localterra": [], "mainnet": [], "test
 
 export async function loadJson(template: any, filename: string): Promise<any> {
     const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath).then(() => { 
-        //logger.log(`${folderPath} was created`) 
-    }).catch(() => {
-       // logger.log(`${folderPath} is exists`)
-    })
+    await fs.mkdir(folderPath).catch(() => { })
     const jsonPath = path.join(folderPath, filename)
     if ((await fs.pathExists(jsonPath))) {
-        return await fs.readJSON(jsonPath)
+        return await fs.readJSON(jsonPath).catch(() => { })
     }
-    else
+    else {
+        await fs.writeJSON(jsonPath, template).catch(() => { })
         return template
+    }
 }
 
 export async function storeJson(JsonObject: any, filename: string) {
     const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath).then(() => { 
-       // logger.log(`${folderPath} was created`) 
-    }).catch(() => {
-       // logger.log(`${folderPath} is exists`)
-    })
+    await fs.mkdir(folderPath).catch(() => { })
     const jsonPath = path.join(folderPath, filename)
-    await fs.writeJSON(jsonPath, JsonObject)
+    await fs.writeJSON(jsonPath, JsonObject).catch(() => { })
 }
 
-export async function renameJson(srcfile:string,dscfile:string) {
+export async function renameJson(srcfile: string, dscfile: string) {
     const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
     const srcPath = path.join(folderPath, srcfile)
     const dscPath = path.join(folderPath, dscfile)
-    await fs.renameSync(srcPath,dscPath)
+    await fs.renameSync(srcPath, dscPath)
 }

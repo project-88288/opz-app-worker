@@ -28,39 +28,28 @@ async function loop(
     try {
       const collectedBlock = await getCollectedBlock()
       const lastHeight = collectedBlock.height
+      const lastestHeight = collectedBlock.latestheight
       //let lastHeight = 0
-      const blockJson = await loadJson(objectTemplate, 'block.json')
+      // const blockJson = await loadJson(objectTemplate, 'block.json')
       //  if (blockJson['mainnet']['height']) {
       //lastHeight = Number.parseInt(blockJson['mainnet']['height'])
       //  }
       const height = lastHeight + 1
-      if (height >= Number.parseInt(blockJson['mainnet']['latestHeight'])) {
-        logger.warn(`No more block to get!`)
-        await bluebird.Promise.delay(120000)
-        const latestBlock = await getLatestBlock()
-
-        if (latestBlock) {
-          blockJson['mainnet']['latestHeight'] = latestBlock.block.header.height
-          await storeJson(blockJson, 'block.json')
-          //  await block_push('worker', ['block.json'])
-        }
-        continue
-      }
 
       await getManager().transaction(async (manager: EntityManager) => {
         const block = await getBlock(height)
         await bluebird.Promise.delay(1000)
         if (block) {
-          findPair(block)
-          findToken(block)
+          //findPair(block)
+          // findToken(block)
           findType(block)
-          blockJson['mainnet']['height'] = block.block.header.height
+          //    blockJson['mainnet']['height'] = block.block.header.height
           // const  height2 = 0
           console.log(height)
           await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
-          await storeJson(blockJson, 'block.json')
-        //  await block_push('worker', ['block.json'])
-          const lastestHeight = blockJson['mainnet']['latestHeight']
+          //  await storeJson(blockJson, 'block.json')
+          //  await block_push('worker', ['block.json'])
+          //const lastestHeight = blockJson['mainnet']['latestHeight']
           if (!(height % 10)) {
             logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
           }
@@ -74,10 +63,10 @@ async function loop(
 }
 
 export async function collect(): Promise<void> {
-  await block_pull('worker', ['block.json', 'tsxtype.json', 'tsxtypeHeight.json', 'peerIpv6.json'])
-  let blockJson = await loadJson(objectTemplate, 'block.json')
-  const height = blockJson['mainnet']['height']
-  logger.info(`Initialize collector, start_block_height: ${height}`)
+  // await block_pull('worker', ['block.json', 'tsxtype.json', 'tsxtypeHeight.json', 'peerIpv6.json'])
+  // let blockJson = await loadJson(objectTemplate, 'block.json')
+  // const height = blockJson['mainnet']['height']
+  // logger.info(`Initialize collector, start_block_height: ${height}`)
   let failcounter = 0
   for (; ;) {
     let connections = getConnections();
@@ -92,6 +81,7 @@ export async function collect(): Promise<void> {
     }
   }
   const collectedBlock = await getCollectedBlock()
+  const height = collectedBlock.height
   await getManager().transaction(async (manager: EntityManager) => {
     await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
   })

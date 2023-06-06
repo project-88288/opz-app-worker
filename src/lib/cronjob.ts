@@ -4,20 +4,26 @@ require('dotenv').config();
 import { CronJob } from 'cron';
 import * as logger from '../lib/logger'
 import { getIPv6Address, getServerPort } from './ipv6';
-import { loadJson, storeJson } from './jsonFiles';
+import { arrayTemplate, loadJson, storeJson } from './jsonFiles';
 import { objectTemplate } from './jsonFiles';
 import { block_push } from 'collector/caches';
 import { getLatestBlock } from 'terra/tendermint';
+import { getCollectedBlock, updateBlock } from 'collector/block';
+import { EntityManager, getManager } from 'typeorm';
+import { BlockEntity } from 'orm';
 
 export const dailyroutine1 = async () => {
   try {
     const port = getServerPort()
     const ipv6 = getIPv6Address()
     if (port && ipv6) {
-      let data = await loadJson(objectTemplate, 'peerIpv6.json')
-      data['mainnet'][ipv6] = port
+      let data = await loadJson(arrayTemplate, 'peerIpv6.json')
+      let names: string[] = data['mainnet']
+      if (!names.includes(`${ipv6}:${port}`)) {
+        names.push(`${ipv6}:${port}`)
+      }
+      data['mainnet'] = names
       storeJson(data, 'peerIpv6.json')
-      block_push('worker', ['peerIpv6.json'])
       logger.warn(`https://${ipv6}:${port}`)
     }
   } catch (error) {
@@ -27,12 +33,13 @@ export const dailyroutine1 = async () => {
 
 export const dailyroutine2 = async () => {
   try {
-    let blockJson = await loadJson(objectTemplate, 'block.json')
     const latestBlock = await getLatestBlock()
     if (latestBlock) {
-      blockJson['mainnet']['latestHeight'] = latestBlock.block.header.height
-      await storeJson(blockJson, 'block.json')
-      await block_push('worker', ['block.json'])
+      const collectedBlock = await getCollectedBlock()
+      const height = Number.parseInt(latestBlock.block.header.height)
+      await getManager().transaction(async (manager: EntityManager) => {
+        await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+      })
     }
   } catch (error) {
     // logger.error(`Dailyroutine error: ${error}`)
