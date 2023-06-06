@@ -10,7 +10,6 @@ import { block_push } from 'collector/caches';
 import { getLatestBlock } from 'terra/tendermint';
 
 export const dailyroutine1 = async () => {
-  logger.warn(`Get ipv6 start`)
   try {
     const port = getServerPort()
     const ipv6 = getIPv6Address()
@@ -27,7 +26,6 @@ export const dailyroutine1 = async () => {
 };
 
 export const dailyroutine2 = async () => {
-  logger.warn(`Update latestHeigh start`)
   try {
     let blockJson = await loadJson(objectTemplate, 'block.json')
     const latestBlock = await getLatestBlock()
