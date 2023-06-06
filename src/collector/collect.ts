@@ -47,6 +47,10 @@ async function loop(
       const lastHeight = collectedBlock.height
       const height = lastHeight + 1
 
+      if(height>= blockJson['mainnet']['latestHeight']) {
+        continue
+      }
+
       if (!(height % 100)) {
         const latestBlock = await getLatestBlock()
         if (latestBlock) {
