@@ -18,6 +18,8 @@ global.Promise = bluebird as any // eslint-disable-line
 
 let isShuttingDown = false
 
+let isDbReady = false
+
 async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
@@ -25,11 +27,13 @@ async function loop(
 
   let blockJson = await loadJson(objectTemplate, 'block.json')
   let failcounter = 0
+
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
         logger.warn(`Db connection ${element.name} is ready`)
+        isDbReady = true
       })
       break
     } else {
@@ -39,7 +43,9 @@ async function loop(
   }
 
   for (; ;) {
+
     if (isShuttingDown) { break }
+    if (!isDbReady) {continue}
 
     try {
 
@@ -86,22 +92,16 @@ async function loop(
 
 export async function collect(): Promise<void> {
 
-
   await block_pull('worker', ['block.json', 'tsxtype.json', 'tsxtypeHeight.json', 'peerIpv6.json'])
 
   let blockJson = await loadJson(objectTemplate, 'block.json')
   const height = blockJson['mainnet']['height']
   logger.info(`Initialize collector, start_block_height: ${height}`)
 
-  try {
-    const collectedBlock = await getCollectedBlock()
-    await getManager().transaction(async (manager: EntityManager) => {
-      await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
-    })
-  } catch (error) {
-    logger.error(`Collector error: ${error}`)
-  }
-
+  const collectedBlock = await getCollectedBlock()
+  await getManager().transaction(async (manager: EntityManager) => {
+    await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+  })
 
   const pairList = await loadJson(objectTemplate, 'allpaircontract.json')
   logger.log('pairs: ', pairList)
