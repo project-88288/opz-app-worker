@@ -47,7 +47,8 @@ async function loop(
       const lastHeight = collectedBlock.height
       const height = lastHeight + 1
 
-      if(height>= blockJson['mainnet']['latestHeight']) {
+      if(height>= Number.parseInt(blockJson['mainnet']['latestHeight'])) {
+        logger.warn(`No more block to get!`)
         await bluebird.Promise.delay(120000)
         const latestBlock = await getLatestBlock()
         if (latestBlock) {
@@ -69,7 +70,7 @@ async function loop(
           await storeJson(blockJson, 'block.json')
           await block_push('worker', ['block.json'])
           const lastestHeight = blockJson['mainnet']['latestHeight']
-          if (!(height % 100)) {
+          if (!(height % 10)) {
             logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
           }
         }
