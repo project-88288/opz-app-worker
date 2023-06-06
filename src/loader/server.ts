@@ -7,7 +7,7 @@ import * as logger from 'lib/logger'
 import { initApp } from './app';
 import { gracefulShutdown } from 'lib/shutdown';
 import { finalizeORM, initORM } from 'orm/connection';
-import { cronJobStart, downloadJson, updateLatestHeight, updateipv6, } from 'lib/cronjob';
+import { cronJobStart, downloadBlockHeight, downloadJson, updateLatestHeight, updateipv6, } from 'lib/cronjob';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -36,6 +36,8 @@ export async function initServer(): Promise<http.Server> {
   await updateLatestHeight()
   bluebird.Promise.delay(2000)
   cronJobStart()
+  await downloadBlockHeight()
+  bluebird.Promise.delay(2000)
 
   process.on('SIGTERM', gracefulShutdown);
   process.on('SIGINT', gracefulShutdown);
