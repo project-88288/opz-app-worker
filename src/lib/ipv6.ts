@@ -46,15 +46,3 @@ export const checkPortAvailability = (port: number) => {
       .listen(port, 'localhost');
   });
 };
-
-/*
-
-checkPortAvailability(port).then((isAvailable) => {
-  if (isAvailable) {
-    console.log(`Port ${port} is available.`);
-  } else {
-    console.log(`Port ${port} is already in use.`);
-  }
-});
-
-*/

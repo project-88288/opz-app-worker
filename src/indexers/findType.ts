@@ -29,10 +29,10 @@ export async function findType(block: BlockInfo) {
     await storeJson(tsxHeight, `tsxtypeHeight.json`)
     await block_push('worker', ['tsxtype.json',`tsxtypeHeight.json`])
 
-    if (!(Number.parseInt(height) % 500)) {
+    if (!(Number.parseInt(height) % 20)) {
       await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_${height}.json`)
-      await block_delete('worker',[`tsxtypeHeight.json`])
       await block_push('worker', [`tsxtypeHeight_${height}.json`])
+      await block_delete('worker',[`tsxtypeHeight.json`])
     }
   }
 }

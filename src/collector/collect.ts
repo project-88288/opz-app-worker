@@ -17,24 +17,17 @@ bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: f
 global.Promise = bluebird as any // eslint-disable-line
 
 let isShuttingDown = false
-
 async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
-
   let blockJson = await loadJson(objectTemplate, 'block.json')
-
   for (; ;) {
-
     if (isShuttingDown) { break }
-
     try {
-
       const collectedBlock = await getCollectedBlock()
       const lastHeight = collectedBlock.height
       const height = lastHeight + 1
-
       if (height >= Number.parseInt(blockJson['mainnet']['latestHeight'])) {
         logger.warn(`No more block to get!`)
         await bluebird.Promise.delay(120000)
@@ -46,7 +39,6 @@ async function loop(
         }
         continue
       }
-
       await getManager().transaction(async (manager: EntityManager) => {
         const block = await getBlock(height)
         if (block) {
@@ -67,19 +59,14 @@ async function loop(
     } catch (error) {
       logger.error(`Collector error: ${error}`)
     }
-
-    await bluebird.Promise.delay(1000)
-  }//
+  }
 }
 
 export async function collect(): Promise<void> {
-
   await block_pull('worker', ['block.json', 'tsxtype.json', 'tsxtypeHeight.json', 'peerIpv6.json'])
-
   let blockJson = await loadJson(objectTemplate, 'block.json')
   const height = blockJson['mainnet']['height']
   logger.info(`Initialize collector, start_block_height: ${height}`)
-
   let failcounter = 0
   for (; ;) {
     let connections = getConnections();
@@ -93,25 +80,18 @@ export async function collect(): Promise<void> {
       await bluebird.Promise.delay(10000)
     }
   }
-
   const collectedBlock = await getCollectedBlock()
   await getManager().transaction(async (manager: EntityManager) => {
     await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
   })
-
   const pairList = await loadJson(objectTemplate, 'allpaircontract.json')
   logger.log('pairs: ', pairList)
-
   const tokenList = await loadJson(objectTemplate, 'alltokencontract.json')
   logger.log('tokens: ', tokenList)
-
-
   logger.warn('Start collecting')
   await loop(pairList, tokenList)
-  //
 }
 
-// Stop accepting new connections
 export async function finalizeCollect() {
   if (!isShuttingDown) isShuttingDown = true
   logger.warn('Stop collecting');

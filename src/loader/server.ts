@@ -22,9 +22,6 @@ export async function initServer(): Promise<http.Server> {
   await initORM()
   bluebird.Promise.delay(2000)
 
-  logger.info('Initialize GraphQL')
-  // await initGraphQL(app)
-
   server = http.createServer(app.callback())
    const {DATABASE_URL} = process.env
   const port = DATABASE_URL? 3100:3101
@@ -49,8 +46,9 @@ export async function finalizeServer(): Promise<void> {
   // Close db connections
   logger.info('Closing db connection')
   await finalizeORM()
-  if (!!process.env.SHUTDOWNTIMEOUT)
+  if (!!process.env.SHUTDOWNTIMEOUT) {
     await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 30000)
-  // await finalizeGraphQL()
+  }
+
   server.close()
 }
