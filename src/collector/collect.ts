@@ -18,34 +18,16 @@ global.Promise = bluebird as any // eslint-disable-line
 
 let isShuttingDown = false
 
-let isDbReady = false
-
 async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
 
   let blockJson = await loadJson(objectTemplate, 'block.json')
-  let failcounter = 0
-
-  for (; ;) {
-    let connections = getConnections();
-    if (connections.length > 0) {
-      connections.forEach(element => {
-        logger.warn(`Db connection ${element.name} is ready`)
-        isDbReady = true
-      })
-      break
-    } else {
-      logger.error(`Db connection empty count ${failcounter++}`)
-      await bluebird.Promise.delay(10000)
-    }
-  }
 
   for (; ;) {
 
     if (isShuttingDown) { break }
-    if (!isDbReady) {continue}
 
     try {
 
@@ -97,6 +79,20 @@ export async function collect(): Promise<void> {
   let blockJson = await loadJson(objectTemplate, 'block.json')
   const height = blockJson['mainnet']['height']
   logger.info(`Initialize collector, start_block_height: ${height}`)
+
+  let failcounter = 0
+  for (; ;) {
+    let connections = getConnections();
+    if (connections.length > 0) {
+      connections.forEach(element => {
+        logger.warn(`Db connection ${element.name} is ready`)
+      })
+      break
+    } else {
+      logger.error(`Db connection empty count ${failcounter++}`)
+      await bluebird.Promise.delay(10000)
+    }
+  }
 
   const collectedBlock = await getCollectedBlock()
   await getManager().transaction(async (manager: EntityManager) => {
