@@ -11,6 +11,7 @@ import { getLatestBlock } from 'terra/tendermint';
 import { getCollectedBlock, updateBlock, updateLatestBlock } from 'collector/block';
 import { EntityManager, getManager } from 'typeorm';
 import { BlockEntity, getConnections } from 'orm';
+import { objectTemplate } from './jsonFiles';
 
 export const updateipv6 = async () => {
   try {
@@ -52,7 +53,7 @@ export const updateLatestHeight = async () => {
       const latestheight = Number.parseInt(latestBlock.block.header.height)
       logger.warn(`New latest height: ${latestheight}`)
       await getManager().transaction(async (manager: EntityManager) => {
-       await  updateLatestBlock(collectedBlock,latestheight, manager.getRepository(BlockEntity))
+        await updateLatestBlock(collectedBlock, latestheight, manager.getRepository(BlockEntity))
       })
     }
   } catch (error) {
@@ -77,10 +78,64 @@ export const uploadJson = async () => {
   await block_push('worker', files).then(() => {
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
-     // removeJson(file)
+      // removeJson(file)
     }
   })
 }
+
+export const downloadBlockHeight = async () => {
+  let failcounter = 0
+  for (; ;) {
+    let connections = getConnections();
+    if (connections.length > 0) {
+      connections.forEach(element => {
+        logger.warn(`Db connection ${element.name} is ready`)
+      })
+      break
+    } else {
+      logger.error(`Db connection empty count ${failcounter++}`)
+      await bluebird.Promise.delay(10000)
+    }
+  }
+  try {
+    const collectedBlock = await getCollectedBlock()
+    await block_pull('worker', ['block.json'])
+    //if(fs.)/////
+    const latestheight = 2000
+    const lastheight = 20
+    logger.warn(`New latest height: ${latestheight}`)
+    await getManager().transaction(async (manager: EntityManager) => {
+      updateBlock(collectedBlock, lastheight, manager.getRepository(BlockEntity))
+      await updateLatestBlock(collectedBlock, latestheight, manager.getRepository(BlockEntity))
+    })
+  } catch (error) { }
+
+};
+export const uploadBlockHeight = async () => {
+  let failcounter = 0
+  for (; ;) {
+    let connections = getConnections();
+    if (connections.length > 0) {
+      connections.forEach(element => {
+        logger.warn(`Db connection ${element.name} is ready`)
+      })
+      break
+    } else {
+      logger.error(`Db connection empty count ${failcounter++}`)
+      await bluebird.Promise.delay(10000)
+    }
+  }
+  try {
+    const collectedBlock = await getCollectedBlock()
+    const block = await loadJson(objectTemplate,'block.json')
+    block['mainnet']['height']=collectedBlock.height
+    block['mainnet']['latestheight']=collectedBlock.latestheight
+    await storeJson(block,'block.json').then(()=>{
+      block_push('worker',['block.json'])
+    })
+  } catch (error) { }
+
+};
 
 export const weeklyroutine = () => {
   logger.warn(`Weekly roution start`)

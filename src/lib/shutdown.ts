@@ -7,7 +7,7 @@ import { stopAcceptingConnections, destroyConnections } from '../loader/app';
 import { finalizeCollect } from '../collector/collect';
 import { finalizeORM } from 'orm';
 import { finalizeServer } from 'loader/server';
-import { cronJobStop, uploadJson } from './cronjob';
+import { cronJobStop, uploadBlockHeight, uploadJson } from './cronjob';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -26,6 +26,9 @@ export async function gracefulShutdown(): Promise<void> {
     await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 10000)
   logger.info('Upload to cloud')
   await uploadJson()
+  if (!!process.env.SHUTDOWNTIMEOUT)
+    await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 10000)
+  await uploadBlockHeight()
   if (!!process.env.SHUTDOWNTIMEOUT)
     await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 10000)
   // Stop accepting new connection

@@ -6,13 +6,14 @@ import * as bluebird from 'bluebird'
 import { EntityManager, getManager } from 'typeorm'
 import { getBlock, getLatestBlock } from '../terra/tendermint';
 import { getConnections, BlockEntity } from 'orm';
-import { getCollectedBlock, updateBlock } from './block';
+import { getCollectedBlock, updateBlock, updateLatestBlock } from './block';
 import { block_pull, block_push } from './caches';
 import { loadJson, storeJson, arrayTemplate, objectTemplate } from '../lib/jsonFiles'
 import { findPair } from 'indexers/findPair';
 import { findToken } from 'indexers/findToken';
 import { findType } from 'indexers/findType';
 import { has } from 'lodash';
+import { updateLatestHeight } from 'lib/cronjob';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -35,10 +36,18 @@ async function loop(
       //lastHeight = Number.parseInt(blockJson['mainnet']['height'])
       //  }
       const height = lastHeight + 1
+      if(height>=lastestHeight) {
+        for(;;) {
+        await bluebird.Promise.delay(1000000)
+         await updateLatestHeight()
+         break
+        }
+        continue
+      }
 
       await getManager().transaction(async (manager: EntityManager) => {
         const block = await getBlock(height)
-        await bluebird.Promise.delay(1000)
+        await bluebird.Promise.delay(500)
         if (block) {
           //findPair(block)
           // findToken(block)
