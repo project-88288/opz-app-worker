@@ -19,7 +19,7 @@ export const dailyroutine1 = async () => {
       data['mainnet'][ipv6] = port
       storeJson(data, 'peerIpv6.json')
       block_push('worker', ['peerIpv6.json'])
-      logger.warn(`https://${ipv6}}:${port}`)
+      logger.warn(`https://${ipv6}:${port}`)
     }
   } catch (error) {
     // logger.error(`Dailyroutine error: ${error}`)
