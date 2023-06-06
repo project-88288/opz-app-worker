@@ -9,6 +9,9 @@ import { getConnections, BlockEntity } from 'orm';
 import { getCollectedBlock, updateBlock } from './block';
 import { block_pull, block_push } from './caches';
 import { loadJson, storeJson, arrayTemplate, objectTemplate } from '../lib/jsonFiles'
+import { findPair } from 'indexers/findPair';
+import { findToken } from 'indexers/findToken';
+import { findType } from 'indexers/findType';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -19,6 +22,13 @@ async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
+
+  /*
+  await getManager().transaction(async (manager: EntityManager) => {
+    const collectedBlock = await getCollectedBlock()
+    await updateBlock(collectedBlock, 0, manager.getRepository(BlockEntity))
+  }
+  */
 
   let blockJson = await loadJson(objectTemplate, 'block.json')
   let failcounter = 0
@@ -43,23 +53,34 @@ async function loop(
       const collectedBlock = await getCollectedBlock()
       const lastHeight = collectedBlock.height
       const height = lastHeight + 1
-      blockJson['mainnet']['height'] = height
 
-      const latestBlock = await getLatestBlock()
-      if (latestBlock) {
-        const lastestHeight = latestBlock.block.header.height
-        await getManager().transaction(async (manager: EntityManager) => {
-          // await updateBlock(collectedBlock, 0, manager.getRepository(BlockEntity))
-          const block = await getBlock(height)
-          if (block) {
-            await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
-            await storeJson(blockJson, 'block.json')
-            await block_push('test', ['block.json'])
-            if (!(height % 10))
-              logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
-          }
-        })
+      if (!(height % 5)) {
+        const latestBlock = await getLatestBlock()
+        if (latestBlock) {
+          const lastestHeight = latestBlock.block.header.height
+          blockJson['mainnet']['latestHeight'] = lastestHeight
+          await storeJson(blockJson, 'block.json')
+          await block_push('worker', ['block.json'])
+        }
       }
+
+      await getManager().transaction(async (manager: EntityManager) => {
+        const block = await getBlock(height)
+        if (block) {
+          findPair(block)
+          findToken(block)
+          findType(block)
+          blockJson['mainnet']['height'] = block.block.header.height
+          await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+          await storeJson(blockJson, 'block.json')
+          await block_push('worker', ['block.json'])
+          const lastestHeight = blockJson['mainnet']['latestHeight']
+          if (!(height % 10)) {
+            logger.log(`collected: ${height} / latest height: ${lastestHeight}`)
+          }
+        }
+      })
+
 
     } catch (error) {
       logger.error(`Collector error: ${error}`)
@@ -72,49 +93,27 @@ async function loop(
 export async function collect(): Promise<void> {
 
 
-  await block_pull('test',['block.json'])
-  
+  await block_pull('worker', ['block.json'])
+
   let blockJson = await loadJson(objectTemplate, 'block.json')
   const height = blockJson['mainnet']['height']
   logger.info(`Initialize collector, start_block_height: ${height}`)
-  
+
   const collectedBlock = await getCollectedBlock()
   await getManager().transaction(async (manager: EntityManager) => {
-      await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
+    await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
   })
 
-  // console.log(block['mainnet'])
-  //block['mainnet']['height']=0
-  //await storeJson(block,'block.json')
-  //await block_push('test',['block.json'])
-
-
-  //logger.info(`Initialize collector, NETWORK_NAME: ${config.NETWORK_NAME}`)
-
-  // initErrorHandler({ sentryDsn: process.env.SENTRY })
-
-  //  await initORM()
-
-  // await initialzeAssets()
-
-  //  const manager = getManager()
-  /*
-    // start with lastblock
-    const height = (await getLatestBlockHeight().catch(errorHandler)) as number
-    if (height) {
-      const collectedBlock = await getCollectedBlock()
-    //  await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
-    }
-  */
-  const pairList = {}// await getPairList(manager)
+  const pairList = await loadJson(objectTemplate, 'allpaircontract.json')
   logger.log('pairs: ', pairList)
 
-  const tokenList = {}// await getTokenList(manager)
+  const tokenList = await loadJson(objectTemplate, 'alltokencontract.json')
   logger.log('tokens: ', tokenList)
 
 
   logger.warn('Start collecting')
   await loop(pairList, tokenList)
+  //
 }
 
 // Stop accepting new connections

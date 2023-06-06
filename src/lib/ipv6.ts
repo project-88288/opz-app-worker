@@ -1,7 +1,16 @@
+#!/usr/bin/env node
 
-import os from 'os';
+require('dotenv').config();
+import { getServer } from 'loader/server';
+import * as bluebird from 'bluebird'
+//import os from 'os';
+const os = require('node:os')
+const net = require('node:net');
 
-function getIPv6Address(): string | undefined {
+bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
+global.Promise = bluebird as any // eslint-disable-line
+
+export function getIPv6Address(): string | undefined {
   const networkInterfaces = os.networkInterfaces();
 
   for (const interfaces of Object.values(networkInterfaces)) {
@@ -17,5 +26,35 @@ function getIPv6Address(): string | undefined {
   return undefined;
 }
 
-const ipv6Address = getIPv6Address();
-console.log('IPv6 Address:', ipv6Address);
+export function getServerPort() {
+  const server = getServer()
+  if(server) {
+    const { port } = server.address() as AddressInfo;
+    return port
+  }
+  return undefined
+}
+
+export const checkPortAvailability = (port: number) => {
+  return new Promise((resolve) => {
+    const server = net.createServer()
+      .once('error', () => resolve(true))
+      .once('listening', () => {
+        server.close();
+        resolve(false);
+      })
+      .listen(port, 'localhost');
+  });
+};
+
+/*
+
+checkPortAvailability(port).then((isAvailable) => {
+  if (isAvailable) {
+    console.log(`Port ${port} is available.`);
+  } else {
+    console.log(`Port ${port} is already in use.`);
+  }
+});
+
+*/

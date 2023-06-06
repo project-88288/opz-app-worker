@@ -7,6 +7,7 @@ import * as logger from 'lib/logger'
 import { initApp } from './app';
 import { gracefulShutdown } from 'lib/shutdown';
 import { finalizeORM, initORM } from 'orm/connection';
+import { cronJobStart, dailyroutine } from 'lib/cronjob';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -31,9 +32,15 @@ export async function initServer(): Promise<http.Server> {
     logger.warn(`Listening on port ${port}`)
   })
 
+  cronJobStart()
+
   process.on('SIGTERM', gracefulShutdown);
   process.on('SIGINT', gracefulShutdown);
   process.on('SIGHUP', gracefulShutdown);
+  return server
+}
+
+export function getServer() {
   return server
 }
 
