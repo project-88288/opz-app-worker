@@ -1,0 +1,12 @@
+[Unit]
+Description= opz-app-worker
+Documentation=https://www.opz.life
+
+[Service]
+ExecStart=/usr/bin/npm start
+Restart=always
+User=chaiya
+WorkingDirectory=/home/chaiya/opz-app-worker
+
+[Install]
+WantedBy=multi-user.target
