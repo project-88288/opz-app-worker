@@ -12,7 +12,6 @@ import { loadJson, storeJson, arrayTemplate, objectTemplate } from '../lib/jsonF
 import { findPair } from 'indexers/findPair';
 import { findToken } from 'indexers/findToken';
 import { findType } from 'indexers/findType';
-import { has } from 'lodash';
 import { updateLatestHeight } from 'lib/cronjob';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
@@ -63,7 +62,6 @@ async function loop(
 
 export async function collect(): Promise<void> {
 
-  let failcounter = 0
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
@@ -72,7 +70,6 @@ export async function collect(): Promise<void> {
       })
       break
     } else {
-      logger.error(`Empty Db connection count ${failcounter++}`)
       await bluebird.Promise.delay(10000)
     }
   }

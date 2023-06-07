@@ -60,7 +60,7 @@ export async function initORM(): Promise<Connection[]> {
       try {
         connections = await map(options, (opt) => initConnection(opt))
         connections.forEach(element => {
-          logger.warn(`DB connection was successful as ${element.name}`)
+          logger.warn(`DB connection was successful as "${element.name}"`)
         })
         break
       } catch (error) {
@@ -110,7 +110,7 @@ export async function initORM(): Promise<Connection[]> {
         try {
           connections = await map(options, (opt) => initConnection(opt))
           connections.forEach(element => {
-            logger.warn(`DB connection was successful as ${element.name}`)
+            logger.warn(`DB connection was successful as "${element.name}"`)
           })
           break
         } catch (error) {
@@ -124,7 +124,7 @@ export async function initORM(): Promise<Connection[]> {
   for(;;){
     if(connections.length>0) {
       connections.forEach(element => {
-        logger.warn(`Db connection (${element.name}) is ready`)
+        logger.warn(`Db connection "${element.name}" is ready`)
       })
       break
     }

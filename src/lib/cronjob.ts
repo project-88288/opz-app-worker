@@ -5,7 +5,7 @@ import { CronJob } from 'cron';
 import * as logger from '../lib/logger'
 import * as bluebird from 'bluebird'
 import { getIPv6Address, getServerPort } from './ipv6';
-import { arrayTemplate, loadJson, removeJson, storeJson } from './jsonFiles';
+import { arrayTemplate, loadJson, removeJson, renameJson, storeJson } from './jsonFiles';
 import { block_pull, block_push } from 'collector/caches';
 import { getLatestBlock } from 'terra/tendermint';
 import { getCollectedBlock, updateBlock, updateLatestBlock } from 'collector/block';
@@ -33,16 +33,11 @@ export const updateipv6 = async () => {
 };
 
 export const updateLatestHeight = async () => {
-  let failcounter = 0
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
-      connections.forEach(element => {
-        logger.warn(`Db connection ${element.name} is ready`)
-      })
       break
     } else {
-      logger.error(`Db connection empty count ${failcounter++}`)
       await bluebird.Promise.delay(10000)
     }
   }
@@ -65,8 +60,7 @@ const files: string[] = [
   'allpaircontract.json',
   'alltokencontract.json',
   'peerIpv6.json',
-  'tsxtype.json',
-  'tsxtypeHeight.json',
+  'tsxtype.json'
 ]
 
 export const downloadJson = async () => {
@@ -74,26 +68,18 @@ export const downloadJson = async () => {
 }
 
 export const uploadJson = async () => {
-  await block_push('worker', files).then(() => {
-    for (let index = 0; index < files.length; index++) {
-      const file = files[index];
-      // removeJson(file)
-    }
+  await block_push('worker', files).then((o) => {
+    removeJson(files)
   })
 }
 
 export const downloadBlockHeight = async () => {
-  let failcounter = 0
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
-      connections.forEach(element => {
-        logger.warn(`Upload height accept Db connection (${element.name})`)
-      })
       break
     } else {
-      logger.error(`Empty connection count ${failcounter++}`)
-      await bluebird.Promise.delay(10000)
+      await bluebird.Promise.delay(500)
     }
   }
   try {
@@ -106,6 +92,11 @@ export const downloadBlockHeight = async () => {
       await getManager().transaction(async (manager: EntityManager) => {
         await updateBlock(collectedBlock, lastheight, manager.getRepository(BlockEntity))
       })
+      //
+      await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_remove.json`).catch(() => { })
+      await  loadJson(objectTemplate, 'tsxtypeHeight.json')
+      await removeJson([`tsxtypeHeight_remove.json`])
+      //
     }
   } catch (error) { }
 
@@ -115,23 +106,27 @@ export const uploadBlockHeight = async () => {
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
-      connections.forEach(element => {
-        logger.warn(`Download height accept Db connection (${element.name})`)
-      })
       break
     } else {
-      logger.error(`Empty connection count ${failcounter++}`)
-      await bluebird.Promise.delay(10000)
+      await bluebird.Promise.delay(500)
     }
   }
   try {
     const collectedBlock = await getCollectedBlock()
+    const height = collectedBlock.height
+    const latestheight = collectedBlock.latestheight
     const block = await loadJson(objectTemplate, 'block.json')
-    block['mainnet']['height'] = collectedBlock.height
-    block['mainnet']['latestheight'] = collectedBlock.latestheight
+    block['mainnet']['height'] = height
+    block['mainnet']['latestheight'] = latestheight
     await storeJson(block, 'block.json').then(() => {
       block_push('worker', ['block.json'])
     })
+    //
+    await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_${height}.json`).catch(() => { })
+    await  loadJson(objectTemplate, 'tsxtypeHeight.json')
+    await block_push('worker', [`tsxtypeHeight_${height}.json`])
+    await removeJson([`tsxtypeHeight_${height}.json`,'block.json'])
+    //
   } catch (error) { }
 
 };

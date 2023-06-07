@@ -3,8 +3,8 @@
 require('dotenv').config();
 import * as fs from 'fs-extra';
 const path = require('path');
-//import * as logger from '../lib/logger'
-//import * as bluebird from 'bluebird'
+import * as logger from '../lib/logger'
+import * as bluebird from 'bluebird'
 
 export const networks = ["mainnet", "testnet", , "classic", "localterra"]
 
@@ -41,9 +41,13 @@ export async function renameJson(srcfile: string, dscfile: string) {
     await fs.renameSync(srcPath, dscPath)
 }
 
-export async function removeJson(filename: string) {
-    const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
-    const filePath = path.join(folderPath, filename)
-    await fs.removeSync(filePath)
+export async function removeJson(filenames: string[]) {
+    for (let index = 0; index < filenames.length; index++) {
+        const filename = filenames[index];
+        const folderPath = path.join(__dirname.replace('/src/lib', ''), process.env.CACHES_FOLDER)
+        const filePath = path.join(folderPath, filename)
+        await fs.removeSync(filePath)
+        logger.log(`Remove file "${filename}"`)
+    }
 }
 

@@ -32,9 +32,9 @@ export async function findType(block: BlockInfo) {
     if (!(Number.parseInt(height) % 500)) {
       try {
       await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_${height}.json`).catch(() => { })
+      await  loadJson(objectTemplate, 'tsxtypeHeight.json')
       await block_push('worker', [`tsxtypeHeight_${height}.json`])
-      await removeJson(`tsxtypeHeight_${height}.json`)
-      loadJson(objectTemplate, 'tsxtypeHeight.json')
+      await removeJson([`tsxtypeHeight_${height}.json`])
       } catch (error) { }
     }
   }
