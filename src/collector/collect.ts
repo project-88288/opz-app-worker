@@ -68,7 +68,7 @@ export async function collect(): Promise<void> {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
-        logger.warn(`Collecter accept db connection (${element.name})`)
+        logger.warn(`Collector accept db connection (${element.name})`)
       })
       break
     } else {
