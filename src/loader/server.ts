@@ -33,7 +33,7 @@ export async function initServer(): Promise<http.Server> {
   await downloadJson()
   bluebird.Promise.delay(2000)
   //
-  await updateLatestHeight()
+  //await updateLatestHeight()
   //
   bluebird.Promise.delay(2000)
   cronJobStart()
