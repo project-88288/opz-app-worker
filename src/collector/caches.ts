@@ -6,7 +6,6 @@ import * as fs from 'fs-extra';
 const path = require('path');
 import * as logger from '../lib/logger'
 import * as bluebird from 'bluebird'
-//import { BlockEntity } from 'orm';
 
 bluebird.Promise.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -14,7 +13,8 @@ global.Promise = bluebird as any // eslint-disable-line
 const storageAccountConnectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 const blobServiceClient = BlobServiceClient.fromConnectionString(storageAccountConnectionString);
 
-export async function caches_pull(containerName: string) {
+export async function caches_pull() {
+    const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
     await fs.mkdir(folderPath).catch(()=>{})
@@ -38,7 +38,8 @@ export async function caches_pull(containerName: string) {
     }
 }
 
-export async function cachses_push(containerName: string) {
+export async function cachses_push() {
+    const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
     await fs.mkdir(folderPath).catch(()=>{})
@@ -66,14 +67,16 @@ export async function cachses_push(containerName: string) {
     }
 }
 
-export async function deleteBolbContainer(containerName: string) {
+export async function deleteBolbContainer() {
+    const containerName = process.env.AZ_CONTAINER
     const containerClient = blobServiceClient.getContainerClient(containerName);
     await containerClient.delete().then(() => {
         logger.warn("Deleted container:", containerClient.containerName);
     })
 }
 
-export async function block_push(containerName: string, files: string[]) {
+export async function block_push(files: string[]) {
+    const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
     await fs.mkdir(folderPath).catch(()=>{})
@@ -101,7 +104,8 @@ export async function block_push(containerName: string, files: string[]) {
     }
 }
 
-export async function block_pull(containerName: string, files: string[]) {
+export async function block_pull(files: string[]) {
+    const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
     await fs.mkdir(folderPath).catch(()=>{})

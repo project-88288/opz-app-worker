@@ -72,11 +72,11 @@ const removefiles: string[] = [
 ]
 
 export const downloadJson = async () => {
-  await block_pull('worker', files)
+  await block_pull(files)
 }
 
 export const uploadJson = async () => {
-  await block_push('worker', files).then((o) => {
+  await block_push( files).then((o) => {
     removeJson(removefiles)
   })
 }
@@ -92,7 +92,7 @@ export const downloadBlockHeight = async () => {
   }
   try {
     const collectedBlock = await getCollectedBlock()
-    await block_pull('worker', ['block.json'])
+    await block_pull(['block.json'])
     const block = await loadJson(objectTemplate, 'block.json')
     if (block) {
       const lastheight = block['mainnet']['height']? block['mainnet']['height'] :0
@@ -149,7 +149,7 @@ export const uploadtsxtypeHeight = async (height: any) => {
     await storeJson(uploadHistory,uploadfile)
     await renameJson(`tsxtypeHeight.json`, outfile).catch(() => { })
     await loadJson(objectTemplate, 'tsxtypeHeight.json')
-    await block_push('worker', [outfile,uploadfile])
+    await block_push( [outfile,uploadfile])
     await removeJson([outfile])
   }
 };
