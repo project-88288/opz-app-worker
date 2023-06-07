@@ -15,15 +15,15 @@ global.Promise = bluebird as any // eslint-disable-line
 let server: http.Server
 
 export async function initServer(): Promise<http.Server> {
+  const { DATABASE_URL,AZ_CONTAINER } = process.env
   logger.info('Initialize app')
   const app = await initApp()
 
   logger.info('Initialize Db')
   await initORM()
   bluebird.Promise.delay(2000)
-
+  logger.log(`Azure container using "${AZ_CONTAINER}"`)
   server = http.createServer(app.callback())
-  const { DATABASE_URL } = process.env
   const port = DATABASE_URL ? 3100 : 3101
   server.listen(port, () => {
     logger.warn(`Listening on port ${port}`)
