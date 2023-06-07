@@ -64,13 +64,20 @@ const files: string[] = [
   'uploadfindTypeHistory.json'
 ]
 
+const removefiles: string[] = [
+  'allpaircontract.json',
+  'alltokencontract.json',
+  'peerIpv6.json',
+  'tsxtype.json'
+]
+
 export const downloadJson = async () => {
   await block_pull('worker', files)
 }
 
 export const uploadJson = async () => {
   await block_push('worker', files).then((o) => {
-    removeJson(files)
+    removeJson(removefiles)
   })
 }
 
@@ -131,17 +138,18 @@ export const uploadBlockHeight = async () => {
 };
 
 export const uploadtsxtypeHeight = async (height: any) => {
-  let uploadHistory = await loadJson(arrayTemplate, 'uploadfindTypeHistory.json')
+  const uploadfile =  'uploadfindTypeHistory.json'
+  let uploadHistory = await loadJson(arrayTemplate, uploadfile)
   let names = uploadHistory['mainnet']
   const outfile = `tsxtypeHeight_${height}.json`
   if (!names.includes(outfile)) {
-    await renameJson(`tsxtypeHeight.json`, outfile).catch(() => { })
-    await loadJson(objectTemplate, 'tsxtypeHeight.json')
-    await block_push('worker', [outfile])
-    await removeJson([outfile])
     names.push(outfile)
     uploadHistory['mainnet']=names
-    await storeJson(uploadHistory,'uploadfindTypeHistory.json')
+    await storeJson(uploadHistory,uploadfile)
+    await renameJson(`tsxtypeHeight.json`, outfile).catch(() => { })
+    await loadJson(objectTemplate, 'tsxtypeHeight.json')
+    await block_push('worker', [outfile,uploadfile])
+    await removeJson([outfile])
   }
 };
 
@@ -170,7 +178,7 @@ export function cronJobStart() {
 export function cronJobStop(durationInMilliseconds: number) {
   setTimeout(() => {
     dailyJob2.stop()
-    dailyJob1.stop();
+   // dailyJob1.stop();
     // weeklyJob.stop();
   }, durationInMilliseconds);
 }

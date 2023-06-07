@@ -27,7 +27,6 @@ export async function initServer(): Promise<http.Server> {
   const port = DATABASE_URL ? 3100 : 3101
   server.listen(port, () => {
     logger.warn(`Listening on port ${port}`)
-    updateipv6()
   })
   bluebird.Promise.delay(2000)
   logger.info('Download from cloud')
