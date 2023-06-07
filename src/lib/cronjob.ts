@@ -46,7 +46,7 @@ export const updateLatestHeight = async () => {
     if (latestBlock) {
       const collectedBlock = await getCollectedBlock()
       const latestheight = Number.parseInt(latestBlock.block.header.height)
-      logger.warn(`New latest height: ${latestheight}`)
+      logger.warn(`New latest height from chain: (${latestheight})`)
       await getManager().transaction(async (manager: EntityManager) => {
         await updateLatestBlock(collectedBlock, latestheight, manager.getRepository(BlockEntity))
       })
@@ -76,12 +76,13 @@ export const downloadJson = async () => {
 }
 
 export const uploadJson = async () => {
-  await block_push( files).then((o) => {
+  await block_push(files).then((o) => {
     removeJson(removefiles)
   })
 }
 
 export const downloadBlockHeight = async () => {
+  //logger.warn(`Load last hight from cloud`)
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
@@ -95,8 +96,10 @@ export const downloadBlockHeight = async () => {
     await block_pull(['block.json'])
     const block = await loadJson(objectTemplate, 'block.json')
     if (block) {
-      const lastheight = block['mainnet']['height']? block['mainnet']['height'] :0
-      logger.warn(`New height: ${lastheight}`)
+      const lastheight = block['mainnet']['height'] ? block['mainnet']['height'] : 0
+      block['mainnet']['height'] = lastheight
+      await storeJson(block, 'block.json')
+      logger.warn(`New height from cloud: (${lastheight})`)
       await getManager().transaction(async (manager: EntityManager) => {
         await updateBlock(collectedBlock, lastheight, manager.getRepository(BlockEntity))
       })
@@ -111,7 +114,7 @@ export const downloadBlockHeight = async () => {
 
 };
 export const uploadBlockHeight = async () => {
-  let failcounter = 0
+  //logger.warn(`Save last hight to cloud`)
   for (; ;) {
     let connections = getConnections();
     if (connections.length > 0) {
@@ -127,9 +130,8 @@ export const uploadBlockHeight = async () => {
     const block = await loadJson(objectTemplate, 'block.json')
     block['mainnet']['height'] = height
     block['mainnet']['latestheight'] = latestheight
-    await storeJson(block, 'block.json').then(() => {
-      block_push('worker', ['block.json'])
-    })
+    await storeJson(block, 'block.json')
+    await block_push(['block.json'])
     //
     await uploadtsxtypeHeight(height)
     await removeJson(['block.json'])
@@ -139,17 +141,17 @@ export const uploadBlockHeight = async () => {
 };
 
 export const uploadtsxtypeHeight = async (height: any) => {
-  const uploadfile =  'uploadfindTypeHistory.json'
+  const uploadfile = 'uploadfindTypeHistory.json'
   let uploadHistory = await loadJson(arrayTemplate, uploadfile)
   let names = uploadHistory['mainnet']
   const outfile = `tsxtypeHeight_${height}.json`
   if (!names.includes(outfile)) {
     names.push(outfile)
-    uploadHistory['mainnet']=names
-    await storeJson(uploadHistory,uploadfile)
+    uploadHistory['mainnet'] = names
+    await storeJson(uploadHistory, uploadfile)
     await renameJson(`tsxtypeHeight.json`, outfile).catch(() => { })
     await loadJson(objectTemplate, 'tsxtypeHeight.json')
-    await block_push( [outfile,uploadfile])
+    await block_push([outfile, uploadfile])
     await removeJson([outfile])
   }
 };
@@ -172,14 +174,14 @@ const weeklyJob = new CronJob(weeklyCronExpression, weeklyroutine);
 
 export function cronJobStart() {
   dailyJob2.start()
- // dailyJob1.start();
+  // dailyJob1.start();
   // weeklyJob.start();
 }
 
 export function cronJobStop(durationInMilliseconds: number) {
   setTimeout(() => {
     dailyJob2.stop()
-   // dailyJob1.stop();
+    // dailyJob1.stop();
     // weeklyJob.stop();
   }, durationInMilliseconds);
 }

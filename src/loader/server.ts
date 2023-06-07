@@ -32,7 +32,9 @@ export async function initServer(): Promise<http.Server> {
   logger.info('Download from cloud')
   await downloadJson()
   bluebird.Promise.delay(2000)
+  //
   await updateLatestHeight()
+  //
   bluebird.Promise.delay(2000)
   cronJobStart()
   await downloadBlockHeight()

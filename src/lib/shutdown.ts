@@ -28,7 +28,9 @@ export async function gracefulShutdown(): Promise<void> {
   await uploadJson()
   if (!!process.env.SHUTDOWNTIMEOUT)
     await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 10000)
+  //
   await uploadBlockHeight()
+  //
   if (!!process.env.SHUTDOWNTIMEOUT)
     await bluebird.Promise.delay(+process.env.SHUTDOWNTIMEOUT ?? 10000)
   // Stop accepting new connection

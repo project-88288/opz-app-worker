@@ -17,7 +17,7 @@ export async function caches_pull() {
     const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath).catch(()=>{})
+    await fs.mkdir(folderPath).catch(() => { })
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -42,7 +42,7 @@ export async function cachses_push() {
     const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath).catch(()=>{})
+    await fs.mkdir(folderPath).catch(() => { })
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -79,7 +79,7 @@ export async function block_push(files: string[]) {
     const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath).catch(()=>{})
+    await fs.mkdir(folderPath).catch(() => { })
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -96,9 +96,8 @@ export async function block_push(files: string[]) {
             if (await fs.pathExists(filePath)) {
                 const data = await fs.readFile(filePath);
                 const blockBlobClient = containerClient.getBlockBlobClient(bolb);
-                await blockBlobClient.upload(data, data.length).then(() => {
-                    logger.log(`Uploaded "${bolb}" to Azure Storage (${containerName})`);
-                })
+                await blockBlobClient.upload(data, data.length)
+                logger.log(`Uploaded "${bolb}" to Azure Storage (${containerName})`);
             }
         }
     }
@@ -108,7 +107,7 @@ export async function block_pull(files: string[]) {
     const containerName = process.env.AZ_CONTAINER
     let containers = []
     const folderPath = path.join(__dirname.replace('/src/collector', ''), process.env.CACHES_FOLDER)
-    await fs.mkdir(folderPath).catch(()=>{})
+    await fs.mkdir(folderPath).catch(() => { })
     for await (const container of blobServiceClient.listContainers()) {
         containers.push(container.name)
     }
@@ -125,9 +124,9 @@ export async function block_pull(files: string[]) {
             const bolb = bolbs[index];
             const filePath = path.join(folderPath, bolb)
             const blockBlobClient = containerClient.getBlockBlobClient(bolb);
-            await blockBlobClient.downloadToFile(filePath).then(() => {
-                logger.log(`Download "${bolb}" from Azue Storage (${containerName})`);
-            })
+            await blockBlobClient.downloadToFile(filePath)
+            logger.log(`Download "${bolb}" from Azue Storage (${containerName})`);
+
         }
     }
 }
