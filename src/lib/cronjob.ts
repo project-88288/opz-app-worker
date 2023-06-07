@@ -88,11 +88,11 @@ export const downloadBlockHeight = async () => {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
-        logger.warn(`Db connection ${element.name} is ready`)
+        logger.warn(`Upload height accept Db connection (${element.name})`)
       })
       break
     } else {
-      logger.error(`Db connection empty count ${failcounter++}`)
+      logger.error(`Empty connection count ${failcounter++}`)
       await bluebird.Promise.delay(10000)
     }
   }
@@ -116,11 +116,11 @@ export const uploadBlockHeight = async () => {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
-        logger.warn(`Db connection ${element.name} is ready`)
+        logger.warn(`Download height accept Db connection (${element.name})`)
       })
       break
     } else {
-      logger.error(`Db connection empty count ${failcounter++}`)
+      logger.error(`Empty connection count ${failcounter++}`)
       await bluebird.Promise.delay(10000)
     }
   }

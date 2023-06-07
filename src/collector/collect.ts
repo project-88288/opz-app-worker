@@ -68,11 +68,11 @@ export async function collect(): Promise<void> {
     let connections = getConnections();
     if (connections.length > 0) {
       connections.forEach(element => {
-        logger.warn(`Db connection ${element.name} is ready`)
+        logger.warn(`Collecter accept db connection (${element.name})`)
       })
       break
     } else {
-      logger.error(`Db connection empty count ${failcounter++}`)
+      logger.error(`Empty Db connection count ${failcounter++}`)
       await bluebird.Promise.delay(10000)
     }
   }

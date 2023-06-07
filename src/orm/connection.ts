@@ -123,10 +123,12 @@ export async function initORM(): Promise<Connection[]> {
 
   for(;;){
     if(connections.length>0) {
+      connections.forEach(element => {
+        logger.warn(`Db connection (${element.name}) is ready`)
+      })
       break
     }
-  }
-  
+  }  
   return connections
 }
 
