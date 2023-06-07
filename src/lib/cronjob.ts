@@ -13,7 +13,7 @@ import { EntityManager, getManager } from 'typeorm';
 import { BlockEntity, getConnections } from 'orm';
 import { objectTemplate } from './jsonFiles';
 
-export const updateipv6 = async () => {
+export const _updateipv6 = async () => {
   try {
     const port = getServerPort()
     const ipv6 = getIPv6Address()
@@ -24,7 +24,7 @@ export const updateipv6 = async () => {
         names.push(`${ipv6}:${port}`)
       }
       data['mainnet'] = names
-      storeJson(data, 'peerIpv6.json')
+      await storeJson(data, 'peerIpv6.json')
       logger.warn(`ipv6 address: ${ipv6}:${port}`)
     }
   } catch (error) {
@@ -38,7 +38,7 @@ export const updateLatestHeight = async () => {
     if (connections.length > 0) {
       break
     } else {
-      await bluebird.Promise.delay(10000)
+      await bluebird.Promise.delay(5000)
     }
   }
   try {
@@ -60,7 +60,8 @@ const files: string[] = [
   'allpaircontract.json',
   'alltokencontract.json',
   'peerIpv6.json',
-  'tsxtype.json'
+  'tsxtype.json',
+  'uploadfindTypeHistory.json'
 ]
 
 export const downloadJson = async () => {
@@ -94,7 +95,7 @@ export const downloadBlockHeight = async () => {
       })
       //
       await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_remove.json`).catch(() => { })
-      await  loadJson(objectTemplate, 'tsxtypeHeight.json')
+      await loadJson(objectTemplate, 'tsxtypeHeight.json')
       await removeJson([`tsxtypeHeight_remove.json`])
       //
     }
@@ -122,13 +123,26 @@ export const uploadBlockHeight = async () => {
       block_push('worker', ['block.json'])
     })
     //
-    await renameJson(`tsxtypeHeight.json`, `tsxtypeHeight_${height}.json`).catch(() => { })
-    await  loadJson(objectTemplate, 'tsxtypeHeight.json')
-    await block_push('worker', [`tsxtypeHeight_${height}.json`])
-    await removeJson([`tsxtypeHeight_${height}.json`,'block.json'])
+    await uploadtsxtypeHeight(height)
+    await removeJson(['block.json'])
     //
   } catch (error) { }
 
+};
+
+export const uploadtsxtypeHeight = async (height: any) => {
+  let uploadHistory = await loadJson(arrayTemplate, 'uploadfindTypeHistory.json')
+  let names = uploadHistory['mainnet']
+  const outfile = `tsxtypeHeight_${height}.json`
+  if (!names.includes(outfile)) {
+    await renameJson(`tsxtypeHeight.json`, outfile).catch(() => { })
+    await loadJson(objectTemplate, 'tsxtypeHeight.json')
+    await block_push('worker', [outfile])
+    await removeJson([outfile])
+    names.push(outfile)
+    uploadHistory['mainnet']=names
+    await storeJson(uploadHistory,'uploadfindTypeHistory.json')
+  }
 };
 
 export const weeklyroutine = () => {
@@ -142,14 +156,14 @@ const dailyCronExpression = '0 8 * * *';
 const weeklyCronExpression = '0 9 * * 1';
 
 // Create cron jobs for daily and weekly routines
-const dailyJob1 = new CronJob(dailyCronExpression, updateipv6);
+//const dailyJob1 = new CronJob(dailyCronExpression, updateipv6);
 const dailyJob2 = new CronJob(dailyCronExpression, updateLatestHeight);
 const weeklyJob = new CronJob(weeklyCronExpression, weeklyroutine);
 
 
 export function cronJobStart() {
   dailyJob2.start()
-  dailyJob1.start();
+ // dailyJob1.start();
   // weeklyJob.start();
 }
 
