@@ -1,0 +1,19 @@
+{
+      "api": {
+        "type": "postgres",
+        "host": "API_DB_HOST",
+        "port": "API_DB_PORT",
+        "username": "API_DB_USERNAME",
+        "password": "API_DB_PASSWORD",
+        "database": "API_DB_DATABASE",
+        "synchronize": "API_DB_SYNCHRONIZE"
+    },
+      "fcd": {
+        "type": "postgres",
+        "host": "FCD_DB_HOST",
+        "port": "FCD_DB_PORT",
+        "username": "FCD_DB_USERNAME",
+        "password": "FCD_DB_PASSWORD",
+        "database": "FCD_DB_DATABASE"
+    }
+}
