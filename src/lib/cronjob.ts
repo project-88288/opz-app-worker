@@ -95,7 +95,7 @@ export const downloadBlockHeight = async () => {
     await block_pull('worker', ['block.json'])
     const block = await loadJson(objectTemplate, 'block.json')
     if (block) {
-      const lastheight = block['mainnet']['height']
+      const lastheight = block['mainnet']['height']? block['mainnet']['height'] :0
       logger.warn(`New height: ${lastheight}`)
       await getManager().transaction(async (manager: EntityManager) => {
         await updateBlock(collectedBlock, lastheight, manager.getRepository(BlockEntity))
@@ -107,6 +107,7 @@ export const downloadBlockHeight = async () => {
       //
     }
   } catch (error) { }
+
 
 };
 export const uploadBlockHeight = async () => {
