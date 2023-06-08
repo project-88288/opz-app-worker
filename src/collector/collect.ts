@@ -44,9 +44,9 @@ async function loop(
         const block = await getBlock(height)
         await bluebird.Promise.delay(500)
         if (block) {
-          findPair(block)
-          findToken(block)
-          findType(block)
+        //  findPair(block)
+        //  findToken(block)
+        //  findType(block)
           await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
           if (!(height % 100)) {
             logger.log(`collected: ${height} / latest height: ${lastestHeight}`)

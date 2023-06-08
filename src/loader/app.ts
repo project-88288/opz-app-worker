@@ -4,10 +4,11 @@ require('dotenv').config();
 import Koa from 'koa';
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser')
-import { UserController } from '../controllers/userController';
 import * as logger from '../lib/logger'
 import * as http from 'http'
 import { exec } from 'child_process';
+import { Context } from 'koa';
+import { pagesRouter } from 'routers/pagesRouter';
 
 const API_VERSION_PREFIX = '/v1'
 const CORS_REGEXP = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.){0,3}terra\.dev(?::\d{4,5})?(?:\/|$)/
@@ -17,20 +18,16 @@ const { DATABASE_URL, AZ_CONTAINER } = process.env
 let server: http.Server
 export async function initApp(): Promise<http.Server> {
   const app = new Koa();
-  const router = Router();
+  const router = pagesRouter
 
   // Middleware
- app.use(bodyParser());
-  // Routes
-  router.get('/', (ctx) => {
-    ctx.body = 'Hello, Koa!';
-  });
+  app.use(bodyParser());
 
   app.use(router.routes()).use(router.allowedMethods());
-  
+
   // Start the server
   server = http.createServer(app.callback())
-  const port = DATABASE_URL ? 3100 : 3101
+  const port = 3000// DATABASE_URL ? 3100 : 3101
   server.listen(port, () => {
     logger.warn(`Listening on port ${port}`)
     exec(`xdg-open http://localhost:${port}`);

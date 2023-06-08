@@ -12,7 +12,7 @@ if(process.env.DATABASE_URL) {
 
 if (require.main === module) {
   initServer()
-  collect()
+ // collect()
 }
 
 //caches_pull('names')

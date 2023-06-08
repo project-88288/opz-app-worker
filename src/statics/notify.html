@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Notification Request</title>
+</head>
+
+<body>
+  <h1>NOTIFY</h1>
+  <h1></h1>
+  <button onclick="redirectionHOME()">HOME</button>
+  <button onclick="redirectionBLOCK()">BLOCK</button>
+  <button onclick="redirectionNOTYFY()">NOTIFY</button>
+  <h1></h1>
+  <script>
+    function redirectionHOME() {
+      window.location.href = 'http://localhost:3000';
+    }
+    function redirectionBLOCK() {
+      window.location.href = 'http://localhost:3000/block';
+    }
+
+    function redirectionNOTYFY() {
+      window.location.href = 'http://localhost:3000/notify';
+    }
+  </script>
+</body>
+
+</html>
