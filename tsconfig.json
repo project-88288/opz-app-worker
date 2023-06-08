@@ -24,17 +24,3 @@
   "include": ["src/**/*.ts"], // Specify the files to include in compilation
   "exclude": ["node_modules"] // Specify the files to exclude from compilation
 }
-
-/*
-{
-  "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
-    "outDir": "dist",
-    "rootDir": "src",
-    "strict": true,
-    "esModuleInterop": true,
-  }
-}
-
-*/
