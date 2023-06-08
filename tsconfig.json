@@ -17,8 +17,12 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "baseUrl": "src",
-    "sourceRoot": "src"
-  }
+    "sourceRoot": "src",
+    "outDir": "dist", // Output directory for compiled JavaScript files
+    "rootDir": "src", // Root directory of your TypeScript source files
+  },
+  "include": ["src/**/*.ts"], // Specify the files to include in compilation
+  "exclude": ["node_modules"] // Specify the files to exclude from compilation
 }
 
 /*
